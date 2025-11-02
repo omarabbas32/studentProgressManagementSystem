@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lalezar&family=Rubik:wght@300..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="downloaddata.css" />
+    <link rel="stylesheet" href="download.css">
+  </head>
+  <body>
+    <div class="container">
+      <label for="chapter">الابواب</label>
+      <select id="chapter" required>
+        <option value="0">الباب الأول</option>
+        <option value="1">الباب الثاني</option>
+        <option value="2">الباب الثالث</option>
+        <option value="3">الباب الرابع</option>
+        <option value="4">الحديثه</option>
+        <option value="5">الباب الثامن</option>
+        <option value="6">كيرشوف</option>
+      </select>
+
+      <label for="level">المستوي</label>
+      <select id="level" required>
+        <option value="0">Yellow</option>
+        <option value="1">Green</option>
+        <option value="2">Red</option>
+        <option value="3">Black</option>
+        <option value="4">Blue</option>
+        <option value="5">Gold</option>
+        <option value="6">Platinum</option>
+        <option value="7">Diamond</option>
+      </select>
+      <div class="header"></div>
+
+      <div class="download-buttons">
+        <button onclick="downloadAllCSV()">تحميل بيانات المستوي</button>
+        <button onclick="downloadAbsentCSV()">تحميل غياب الإسبوع</button>
+      </div>
+    </div>
+    <script>
+        let baseAPi =`http://localhost:5000`;
+        function downloadFile(url, fileName) {
+          fetch(url)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.blob();
+            })
+            .then(blob => {
+              const downloadUrl = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = downloadUrl;
+              a.download = fileName;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            })
+            .catch(error => {
+              alert("حدث خطأ أثناء تحميل الملف: " + error.message);
+            });
+        }
+      
+        function downloadAllCSV() {
+          const chapter = document.getElementById("chapter").value;
+          const level = document.getElementById("level").value;
+          const apiUrl = `${baseAPi}/api/Download/empty-problems-excel/${chapter}/${level}`;
+          downloadFile(apiUrl, `problems_ch${chapter}_lvl${level}.xlsx`);
+        }
+      
+        function downloadAbsentCSV() {
+          const apiUrl = `${baseAPi}/api/Download/absent/current-week`;
+          downloadFile(apiUrl, `absent_current_week.xlsx`);
+        }
+      </script>
+      
+  </body>
+</html>

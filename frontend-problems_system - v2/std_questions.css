@@ -1,0 +1,197 @@
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+* {
+  font-family: "Lalezar", system-ui;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+body {
+  background: url(img/2.png) no-repeat center center fixed;
+  background-size: cover;
+  font-family: "Arial", sans-serif;
+  direction: rtl;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.79);
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+  text-align: center;
+  font-size: 24px;
+  color: #0b163f;
+}
+
+form {
+  margin-bottom: 20px;
+  background-color: #fafafa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+  display: block;
+  margin-top: 10px;
+  font-size: 16px;
+  color: #0b163f;
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0b163f;
+}
+
+form button {
+  display: block;
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #0b163f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+form button:hover {
+  background-color: #0b163fd1;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table,
+th,
+td {
+  border: 1px solid #ddd;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: center;
+}
+th,
+td:hover {
+  background-color: #0b163f54;
+}
+
+th {
+  background-color: #f1f1f1;
+  font-size: 16px;
+  color: #0b163f;
+}
+
+td {
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.actions button {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.actions .edit {
+  color: #002aff;
+}
+
+.actions .delete {
+  color: #ff0800;
+}
+
+.actions .edit:hover {
+  color: #025aa5;
+}
+
+.actions .delete:hover {
+  color: #c9302c;
+}
+
+.actions .solve-btn {
+  color: #28a745;
+  border: 1px solid #28a745;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.actions .solve-btn:hover {
+  color: #fff;
+  background-color: #28a745;
+}
+
+.status {
+  font-weight: bold;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.status.solved {
+  color: #28a745;
+  background-color: #d4edda;
+}
+
+.status.remaining {
+  color: #ffc107;
+  background-color: #fff3cd;
+}
+
+.level-completed {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 2px solid #28a745;
+}
+
+.finish-level-btn {
+  display: block;
+  margin: 30px auto 0;
+  padding: 12px 25px;
+  background-color: #ff0800;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+.finish-level-btn:hover {
+  background-color: #09ff00;
+}
+
+.finish-level-btn i {
+  margin-left: 8px;
+}

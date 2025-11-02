@@ -1,0 +1,236 @@
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+    * {
+      font-family: "Lalezar", system-ui;
+      font-weight: 600;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 10px;
+      background: url(img/2.png) no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      color: white;
+      direction: rtl;
+      margin-top: 20px;
+    }
+
+    h2 {
+      padding-top: 2.5%;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .form-container {
+      background-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      padding: 15px;
+      width: 100%;
+      max-width: 600px;
+      margin: 5% 0;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .form-container label {
+      color: #0b163f;
+      margin: 6px 0 3px;
+      font-size: 18px;
+    }
+
+    .form-container input,
+    .form-container button {
+      color: #0b163f;
+      margin: 4px 0;
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    .form-container input {
+      background-color: #f0f0f0;
+    }
+
+    .form-container button {
+      background-color: #0b163f;
+      color: white;
+      cursor: pointer;
+      padding: 10px;
+      font-size: 18px;
+      font-weight: 590;
+    }
+
+    .form-container button:hover {
+      background-color: #ffffff;
+      color: #0b163f;
+    }
+
+    .attendance-box {
+      background-color: #0b163f;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+
+    .attendance-box p {
+      margin: 0;
+      color: white;
+      font-size: 16px;
+    }
+
+    #attendanceCircle {
+      width: 100px;
+      height: 100px;
+      margin: 10px auto;
+      position: relative;
+    }
+
+
+    @media (max-width: 768px) {
+      body {
+        padding: 18px;
+        margin-top: 15px;
+      }
+
+      h2 {
+
+        font-size: 18px;
+      }
+
+      .form-container {
+        max-width: 95%;
+        padding: 12px;
+      }
+
+      .form-container label {
+        font-size: 16px;
+      }
+
+      .form-container input,
+      .form-container button {
+        font-size: 14px;
+        padding: 8px;
+      }
+
+      .attendance-box p {
+        font-size: 14px;
+      }
+
+      .view-grade-btn {
+        font-size: 16px;
+        padding: 8px;
+        margin-top: 10px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      body {
+        padding: 5px;
+        margin-top: 10px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .form-container {
+        padding: 10px;
+        max-width: 98%;
+      }
+
+      .form-container label {
+        font-size: 14px;
+      }
+
+      .form-container input,
+      .form-container button {
+        font-size: 13px;
+        padding: 7px;
+      }
+
+      .attendance-box p {
+        font-size: 13px;
+      }
+
+      .view-grade-btn {
+        font-size: 14px;
+        padding: 7px;
+        margin-top: 8px;
+      }.streak-container {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+      
+      #streakBars {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+      }
+      
+      .streak-bar {
+        height: 30px;
+        flex: 1;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+      }
+      
+      .present {
+        background-color: #28a745;
+      }
+      
+      .absent {
+        background-color: #dc3545;
+      }
+      
+      .streak-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+      }
+
+
+      
+    }
+
+
+    .absence-streak-box {
+      width: 100%;
+      font-size:18px;
+      margin-top: 20px;
+      padding: 10px;
+      border: 2px solid #ffffff;
+      border-radius: 8px;
+      background-color: #ffeaea;
+      text-align: center;
+     
+    }
+    
+    .absence-streak-box p {
+      margin: 0;
+      color: #0b163f;
+    }

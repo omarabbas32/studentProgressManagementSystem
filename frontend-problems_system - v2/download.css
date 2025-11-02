@@ -1,0 +1,108 @@
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+* {
+  font-family: "Lalezar", system-ui;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0b163f;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px;
+  background: url(img/leve2.png) no-repeat center center fixed #0b163f;
+  background-size: cover;
+  overflow-x: hidden;
+  direction: rtl;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header {
+  color: #0b163f;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.download-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.download-buttons button {
+  font-size: 20px;
+  padding: 15px 30px;
+  background-color: #ffffff;
+  color: #0b163f;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 250px;
+}
+
+.download-buttons button:hover {
+  background-color: #152971;
+  color: white;
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 15px;
+  padding: 12px 20px;
+  background-color: #0b163f;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #ffffff;
+  color: #0b163f;
+}
+h1 {
+  margin: 20px 0;
+  color: #ffffff;
+}
+label {
+  margin: 20px 0;
+  display: block;
+  margin: 15px 0 5px;
+  color: #ffffff;
+  font-size: 24px;
+}
+input,
+select,
+button {
+  margin: 5px 0;
+  font-size: 18px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+
+  color: #0b163f;
+}
+.container {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #ffffff46;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

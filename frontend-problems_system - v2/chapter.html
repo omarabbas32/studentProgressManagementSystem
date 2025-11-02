@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapters</title>
+    <link rel="stylesheet" href="chapter.css">
+  </head>
+  <body>
+    <div class="chapter-container">
+      <div class="chapter-box">
+        <div class="chapter-item">
+          <a href="#" class="chapter-link">
+            <div class="chapter-title">الباب الأول</div>
+          </a>
+        </div>
+
+        <div class="chapter-item">
+          <a href="#" class="chapter-link">
+            <div class="chapter-title">الباب الثاني</div>
+          </a>
+        </div>
+
+        <div class="chapter-item">
+          <a href="#" class="chapter-link">
+            <div class="chapter-title">الباب الثالث</div>
+          </a>
+        </div>
+
+        <div class="chapter-item">
+          <a href="#" class="chapter-link">
+            <div class="chapter-title">الباب الرابع</div>
+          </a>
+        </div>
+
+        <div class="chapter-item">
+          <a href="#" class="chapter-link">
+            <div class="chapter-title">ابواب الحديثه</div>
+          </a>
+        </div>
+
+        <div class="chapter-item">
+          <a href="#" class="chapter-link">
+            <div class="chapter-title">الباب الثامن</div>
+          </a>
+        </div>
+
+        <div class="chapter-item">
+          <a href="#" class="chapter-link">
+            <div class="chapter-title">كيرشوف</div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const chapterLinks = document.querySelectorAll(".chapter-link");
+      
+          chapterLinks.forEach((link, index) => {
+            link.addEventListener("click", (e) => {
+              e.preventDefault(); // Prevent default anchor behavior
+              localStorage.setItem("chapter", index); // Save chapter index
+              window.location.href = "level.html"; // Redirect to level page
+            });
+          });
+        });
+      </script>
+      
+      
+  </body>
+</html>

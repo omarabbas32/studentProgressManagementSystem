@@ -1,0 +1,134 @@
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+
+* {
+  font-family: "Lalezar", system-ui;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url("img/chapter.png") no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
+  color: white;
+  direction: rtl;
+  font-family: sans-serif;
+}
+
+.chapter-container {
+  width: 100%;
+  max-width: 1140px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chapter-box {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+
+.chapter-item {
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  flex: 0 0 calc(33.333% - 30px);
+  max-width: calc(33.333% - 30px);
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  animation: fadeInUp 0.8s ease forwards;
+  opacity: 0;
+}
+
+.chapter-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.chapter-item:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.chapter-item:nth-child(3) {
+  animation-delay: 0.5s;
+}
+.chapter-item:nth-child(4) {
+  animation-delay: 0.7s;
+}
+.chapter-item:nth-child(5) {
+  animation-delay: 0.9s;
+}
+.chapter-item:nth-child(6) {
+  animation-delay: 1.1s;
+}
+.chapter-item:nth-child(7) {
+  animation-delay: 1.3s;
+}
+
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.chapter-link {
+  opacity: 0.9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 30px 20px;
+  background-color: #0b163f; 
+  transition: background 0.5s ease;
+  text-decoration: none;
+  height: 180px;
+}
+
+.chapter-link:hover {
+  background-color: #ffffff;
+  transform: scale(1.2);
+}
+
+.chapter-title {
+  font-size: 24px;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+  transition: color 0.5s ease;
+}
+
+.chapter-link:hover .chapter-title {
+  color: #0b163f;
+
+}
+
+
+
+@media (max-width: 767px) {
+
+.chapter-item {
+flex: 0 0 100%;
+max-width: 100%;
+padding: 10px; 
+}
+
+.chapter-link {
+height: auto; 
+padding: 10px; 
+}
+
+.chapter-title {
+font-size: 18px; 
+}
+}

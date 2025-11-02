@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+* {
+  font-family: "Lalezar", system-ui;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+}
+body {
+  background: url(img/att2.png) no-repeat center center fixed;
+  width: 100%;
+  background-size: cover;
+  font-family: "Arial", sans-serif;
+  direction: rtl;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #17286479;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 8px;
+}
+h2 {
+  text-align: center;
+  color: #ffffff;
+  font-weight: 500;
+}
+label {
+  display: block;
+  margin: 15px 0 5px;
+  color: #ffffff;
+  font-size: 20px;
+}
+input,
+select,
+button {
+  font-size: 16px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  color: #0b163f;
+}
+button {
+  background-color: #0b163f;
+  text-align: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  border: none;
+  margin-top: 15px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #ffffff;
+  color: #0b163f;
+}
+.message {
+  border-radius: 5px;
+  background-color: #0b163f;
+  padding: 10px;
+  margin-top: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+table,
+th,
+td {
+  border: 1px solid #ddd;
+  color: #ffffff;
+}
+th,
+td {
+  padding: 10px;
+  text-align: center;
+}
+th {
+  background-color: #ffffff;
+  color: #0b163f;
+}
+.delete-btn {
+  background-color: #ff0019;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+.delete-btn:hover {
+  background-color: #bc0215;
+  color: #ffffff;
+}

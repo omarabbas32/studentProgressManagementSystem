@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>search and attendance</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+      /* Add these styles for the chapter selection */
+      .chapter-container {
+        margin: 20px auto;
+        max-width: 400px;
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .chapter-container label {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+      }
+      
+      .chapter-container select {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.9rem;
+        border: 2px solid #3498db;
+        border-radius: 5px;
+        background-color: white;
+        color: #333;
+        margin-bottom: 10px;
+      }
+      
+      .chapter-container select:focus {
+        outline: none;
+        border-color: #2980b9;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background-image"></div>
+
+    <div class="top-buttons">
+      <button onclick="window.location.href='problem.html'">إضافة مسائل جديدة</button>
+      <button onclick="window.location.href='download.html'">تحميل البيانات</button>
+    </div>
+
+    <div class="search-container">
+      <h2>البحث عن الطالب</h2>
+      <select id ="searchType" title="saif">
+        <option value="name">الاسم</option>
+        <option value="code" selected>الكود</option>
+      </select> 
+      <input type="text" id="searchInput" placeholder="اكتب الكود أو الاسم" />
+
+      <button id="searchBtn">بحث</button>
+      <div id="resultsList" style="display: none;"></div>
+      <h3>الغياب</h3>
+      <input
+        type="text"
+        id="attendanceInput"
+        placeholder="اكتب الكود لتسجيل الحضور"
+      />
+      <button id="attendanceBtn">تسجيل الحضور</button>
+    </div>
+    
+    <!-- Chapter selection container -->
+    <div class="chapter-container">
+      <label for="thisweekchapter">الابواب</label>
+      <select id="thisweekchapter" required>
+        <option value="0">الباب الأول</option>
+        <option value="1">الباب الثاني</option>
+        <option value="2">الباب الثالث</option>
+        <option value="3">الباب الرابع</option>
+        <option value="4">الحديثه</option>
+        <option value="5">الباب الثامن</option>
+        <option value="6">كيرشوف</option>
+      </select>
+    </div>
+    
+    <script>
+      // Chapter storage with 1-day expiration
+      document.addEventListener("DOMContentLoaded", function() {
+  // Load saved chapter if exists
+  const thisweekchapter = localStorage.getItem('thisweekchapter');
+  
+  if (thisweekchapter) {
+    document.getElementById("thisweekchapter").value = thisweekchapter;
+  }
+  
+  // Save chapter when changed
+  document.getElementById("thisweekchapter").addEventListener("change", function() {
+    // Store directly for API compatibility
+    localStorage.setItem("thisweekchapter", this.value);
+  });
+});
+
+// If you still want expiration functionality, keep these but use a different key
+function setWithExpiration(key, value, ttl) {
+  const now = new Date();
+  const item = {
+    value: value,
+    expiration: now.getTime() + ttl
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+}
+
+function getWithExpiration(key) {
+  const itemStr = localStorage.getItem(key);
+  if (!itemStr) return null;
+  
+  try {
+    const item = JSON.parse(itemStr);
+    const now = new Date();
+    
+    if (now.getTime() > item.expiration) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return item.value;
+  } catch (e) {
+    // If parsing fails, return the direct value
+    return itemStr;
+  }
+}
+
+      // Rest of the existing functionality
+      const API_BASE = "http://localhost:5000/api";
+      const searchType = document.getElementById("searchType");
+      const searchInput = document.getElementById("searchInput");
+      const searchBtn = document.getElementById("searchBtn");
+      const resultsList = document.getElementById("resultsList");
+      const attendanceInput = document.getElementById("attendanceInput");
+      const attendanceBtn = document.getElementById("attendanceBtn");
+
+      // Update placeholder based on search type
+      searchType.addEventListener("change", () => {
+        searchInput.placeholder = searchType.value === "name" 
+          ? "اكتب الاسم" 
+          : "اكتب الكود";
+        resultsList.style.display = "none";
+        searchInput.value = "";
+      });
+
+      // Handle search
+      searchBtn.addEventListener("click", handleSearch);
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleSearch();
+      });
+
+      function handleSearch() {
+        const value = searchInput.value.trim();
+        const type = searchType.value;
+
+        if (!value) {
+          alert("من فضلك اكتب قيمة للبحث");
+          return;
+        }
+
+        if (type === "code") {
+          fetch(`${API_BASE}/Students/search-id?id=${value}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data?.studentId) {
+                localStorage.setItem("studentId", data.studentId);
+                window.location.href = "profile.html";
+              } else {
+                alert("الطالب غير موجود");
+              }
+            })
+            .catch(() => alert("حدث خطأ أثناء البحث"));
+        } else {
+          fetch(`${API_BASE}/Students/search-name?name=${encodeURIComponent(value)}`)
+            .then(res => res.json())
+            .then(data => {
+              resultsList.innerHTML = "";
+              if (Array.isArray(data) && data.length > 0) {
+                data.forEach(student => {
+                  const div = document.createElement("div");
+                  div.textContent = `${student.name} - ${student.studentId}`;
+                  div.addEventListener("click", () => {
+                    localStorage.setItem("studentId", student.studentId);
+                    window.location.href = "profile.html";
+                  });
+                  resultsList.appendChild(div);
+                });
+                resultsList.style.display = "block";
+              } else {
+                resultsList.style.display = "none";
+                alert("لا يوجد نتائج مطابقة");
+              }
+            })
+            .catch(err => {
+              console.error("Error fetching students:", err);
+              alert("حدث خطأ أثناء جلب الأسماء");
+            });
+        }
+      }
+
+      // Handle attendance
+      attendanceBtn.addEventListener("click", handleAttendance);
+      attendanceInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleAttendance();
+      });
+
+      function handleAttendance() {
+        const value = attendanceInput.value.trim();
+
+        if (!value) {
+          alert("من فضلك اكتب كود الطالب");
+          return;
+        }
+      
+        fetch(`${API_BASE}/Attendance/${value}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            isPresent: true,
+            notes: ""
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(data => {
+          alert("✅ تم تسجيل الحضور بنجاح");
+          attendanceInput.value = "";
+        })
+        .catch(() => alert("❌ الطالب غير موجود أو حدث خطأ أثناء تسجيل الحضور"));
+      }
+    </script>
+  </body>
+</html>

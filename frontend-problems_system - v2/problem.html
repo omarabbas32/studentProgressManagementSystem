@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assign Questions</title>
+    <link rel="stylesheet" href="problem.css">
+  </head>
+  <body>
+    <div class="container">
+      <h2>إضافة المسائل</h2>
+      <form id="assignProblemForm">
+        <label for="book">الكتاب</label>
+        <input type="text" id="book" required />
+
+        <label for="page">الصفحة</label>
+        <input type="text" id="page" required />
+
+        <label for="number">رقم المسألة</label>
+        <input type="text" id="number" required />
+
+        <label for="chapter">الابواب</label>
+        <select id="chapter" required>
+          <option value="0">الباب الأول</option>
+          <option value="1">الباب الثاني</option>
+          <option value="2">الباب الثالث</option>
+          <option value="3">الباب الرابع</option>
+          <option value="4">الحديثه</option>
+          <option value="5">الباب الثامن</option>
+          <option value="6">كيرشوف</option>
+        </select>
+
+        <label for="level">المستوي</label>
+        <select id="level" required>
+          <option value="0">Yellow</option>
+          <option value="1">Green</option>
+          <option value="2">Red</option>
+          <option value="3">Black</option>
+          <option value="4">Blue</option>
+          <option value="5">Gold</option>
+          <option value="6">Platinum</option>
+          <option value="7">Diamond</option>
+        </select>
+
+        <button type="submit">إضافة المسألة</button>
+      </form>
+      <div class="message" id="message"></div>
+
+      <h2>المسائل الموجوده</h2>
+      <table id="problemsTable">
+        <thead>
+          <tr>
+            <th>الكتاب</th>
+            <th>الصفحة</th>
+            <th>رقم المسألة</th>
+            <th>الباب</th>
+            <th>المستوي</th>
+            <th>حذف</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Problems will be loaded here -->
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      const form = document.getElementById("assignProblemForm");
+      const messageDiv = document.getElementById("message");
+      const problemsTable = document.querySelector("#problemsTable tbody");
+
+      // Load problems when page loads
+      document.addEventListener("DOMContentLoaded", loadProblems);
+
+      function loadProblems() {
+        const chapter = parseInt(document.getElementById("chapter").value) || 0;
+        const level = parseInt(document.getElementById("level").value) || 0;
+
+        console.log(`[Frontend] Loading problems for chapter=${chapter}, level=${level}`);
+        problemsTable.innerHTML = `<tr><td colspan="6">جاري التحميل...</td></tr>`;
+
+        fetch(`http://localhost:5000/api/Problem/all/${chapter}/${level}`)
+          .then((response) => {
+            console.log(`[Frontend] Response status:`, response.status);
+            if (!response.ok) {
+              // If 404, return empty array instead of throwing
+              if (response.status === 404) {
+                console.log(`[Frontend] 404 - returning empty array`);
+                return [];
+              }
+              // Try to get error message from response
+              return response.json().then(err => {
+                throw new Error(err.error || `HTTP ${response.status}: Failed to load problems`);
+              }).catch(() => {
+                throw new Error(`HTTP ${response.status}: Failed to load problems`);
+              });
+            }
+            return response.json();
+          })
+          .then((problems) => {
+            console.log(`[Frontend] Received ${problems.length} problems:`, problems);
+            problemsTable.innerHTML = "";
+            
+            if (!problems || problems.length === 0) {
+              problemsTable.innerHTML = `<tr><td colspan="6">لا توجد مسائل متاحة للباب ${chapter} والمستوى ${level}</td></tr>`;
+              return;
+            }
+            
+            problems.forEach((problem) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td>${problem.book || 'غير محدد'}</td>
+                <td>${problem.page || '--'}</td>
+                <td>${problem.numberOfProblem || '--'}</td>
+                <td>${getChapterName(problem.chapter)}</td>
+                <td>${getLevelName(problem.level)}</td>
+                <td><button class="delete-btn" data-id="${problem.problemId}">Delete</button></td>
+              `;
+              problemsTable.appendChild(row);
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll(".delete-btn").forEach((btn) => {
+              btn.addEventListener("click", function () {
+                const problemId = this.getAttribute("data-id");
+                deleteProblem(problemId);
+              });
+            });
+          })
+          .catch((error) => {
+            console.error("[Frontend] Error loading problems:", error);
+            console.error("[Frontend] Error details:", error);
+            problemsTable.innerHTML = `<tr><td colspan="6">خطأ في تحميل المسائل: ${error.message || 'Unknown error'}</td></tr>`;
+          });
+      }
+      function deleteProblem(problemId) {
+  if (!confirm("هل انت متأكد من مسح المسألة؟")) return;
+
+  const row = document.querySelector(`button[data-id="${problemId}"]`).closest("tr");
+
+  const book = row.cells[0].textContent.trim();
+  const page = parseInt(row.cells[1].textContent.trim());
+  const numberOfProblem = parseInt(row.cells[2].textContent.trim());
+  const chapter = parseInt(document.getElementById("chapter").value); // use form select value
+  const level = parseInt(document.getElementById("level").value);     // use form select value
+
+  const data = {
+    book,
+    page,
+    numberOfProblem,
+    chapter,
+    level
+  };
+
+  fetch("http://localhost:5000/api/Problem/remove", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("لم يتم مسح المسألة");
+      loadProblems(); // Refresh the table
+      messageDiv.textContent = "تم مسح المسألة من جميع الطلاب";
+      messageDiv.style.color = "green";
+    })
+    .catch((error) => {
+      console.error("لم يتم مسح المسألة", error);
+      messageDiv.textContent = "لم يتم مسح المسألة";
+      messageDiv.style.color = "red";
+    });
+}
+
+
+      function getChapterName(index) {
+        const chapters = [
+          "Ch1",
+          "Ch2",
+          "Ch3",
+          "Ch4",
+          "ModernPhysics",
+          "Ch8",
+          "Kirchhoff",
+        ];
+        return chapters[index] || "Unknown";
+      }
+
+      function getLevelName(index) {
+        const levels = [
+          "Yellow",
+          "Green",
+          "Red",
+          "Black",
+          "Blue",
+          "Gold",
+          "Platinum",
+          "Diamond",
+        ];
+        return levels[index] || "Unknown";
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        messageDiv.textContent = "";
+        messageDiv.style.color = "";
+
+        const problem = {
+          book: document.getElementById("book").value,
+          page: parseInt(document.getElementById("page").value),
+          numberOfProblem: parseInt(document.getElementById("number").value),
+          level: parseInt(document.getElementById("level").value),
+          chapter: parseInt(document.getElementById("chapter").value),
+        };
+
+        try {
+          // Try new centralized system first
+          let response = await fetch("http://localhost:5000/api/problems", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(problem),
+          });
+
+          if (!response.ok) {
+            // Fallback to old system if new system fails (e.g., no students)
+            response = await fetch("http://localhost:5000/api/Problem/assign", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(problem),
+            });
+          }
+
+          if (!response.ok) throw new Error("Failed to assign problem");
+          
+          loadProblems();
+          messageDiv.textContent = "تم إضافة المسألة بنجاح";
+          messageDiv.style.color = "green";
+          form.reset();
+        } catch (error) {
+          console.error("Error assigning problem:", error);
+          messageDiv.textContent = "حدث خطأ في إضافة المسألة: " + error.message;
+          messageDiv.style.color = "red";
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+[
+  {
+    "studentId": 1,
+    "name": "Omar Abbas",
+    "number": "4455585885",
+    "parentNumber": "8888888",
+    "group": "jjj",
+    "remainingProblems": [],
+    "solvedProblems": [
+      1,
+      3,
+      2
+    ],
+    "completedLevels": [
+      "0-0"
+    ],
+    "assignedProblems": [],
+    "attendances": [
+      {
+        "isPresent": true,
+        "notes": "",
+        "studentId": 1,
+        "attendanceId": 1,
+        "weekStartDate": "2025-10-31T22:00:00.000Z",
+        "weekEndDate": "2025-11-06T22:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "studentId": 2,
+    "name": "omar",
+    "number": "20564764",
+    "parentNumber": "45654",
+    "group": "45654",
+    "remainingProblems": [
+      2,
+      3
+    ],
+    "solvedProblems": [
+      1
+    ],
+    "completedLevels": [],
+    "assignedProblems": [],
+    "attendances": []
+  }
+]
