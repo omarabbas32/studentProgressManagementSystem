@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Assign Questions</title>
     <link rel="stylesheet" href="problem.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   </head>
   <body>
     <div class="container">
@@ -44,7 +45,6 @@
 
         <button type="submit">إضافة المسألة</button>
       </form>
-      <div class="message" id="message"></div>
 
       <h2>المسائل الموجوده</h2>
       <table id="problemsTable">
@@ -64,10 +64,23 @@
       </table>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
       const form = document.getElementById("assignProblemForm");
-      const messageDiv = document.getElementById("message");
       const problemsTable = document.querySelector("#problemsTable tbody");
+
+      // Toast function
+      function showToast(msg, type="success") {
+        const bgColor = type === "success" ? "#28a745" : "#dc3545";
+        Toastify({
+          text: msg,
+          duration: 3000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: bgColor,
+          stopOnFocus: true,
+        }).showToast();
+      }
 
       // Load problems when page loads
       document.addEventListener("DOMContentLoaded", () => {
@@ -77,7 +90,7 @@
         if (savedLevel !== null) document.getElementById("level").value = savedLevel;
         loadProblems();
       });
-      
+
       // Reload problems when chapter or level changes
       document.getElementById("chapter").addEventListener("change", () => {
         localStorage.setItem("selectedChapter", document.getElementById("chapter").value);
@@ -92,19 +105,12 @@
         const chapter = parseInt(document.getElementById("chapter").value) || 0;
         const level = parseInt(document.getElementById("level").value) || 0;
 
-        console.log(`[Frontend] Loading problems for chapter=${chapter}, level=${level}`);
         problemsTable.innerHTML = `<tr><td colspan="6">جاري التحميل...</td></tr>`;
 
         fetch(`http://localhost:5000/api/Problem/all/${chapter}/${level}`)
           .then((response) => {
-            console.log(`[Frontend] Response status:`, response.status);
             if (!response.ok) {
-              // If 404, return empty array instead of throwing
-              if (response.status === 404) {
-                console.log(`[Frontend] 404 - returning empty array`);
-                return [];
-              }
-              // Try to get error message from response
+              if (response.status === 404) return [];
               return response.json().then(err => {
                 throw new Error(err.error || `HTTP ${response.status}: Failed to load problems`);
               }).catch(() => {
@@ -114,14 +120,11 @@
             return response.json();
           })
           .then((problems) => {
-            console.log(`[Frontend] Received ${problems.length} problems:`, problems);
             problemsTable.innerHTML = "";
-            
             if (!problems || problems.length === 0) {
               problemsTable.innerHTML = `<tr><td colspan="6">لا توجد مسائل متاحة للباب ${chapter} والمستوى ${level}</td></tr>`;
               return;
             }
-            
             problems.forEach((problem) => {
               const row = document.createElement("tr");
               row.innerHTML = `
@@ -141,7 +144,6 @@
               problemsTable.appendChild(row);
             });
 
-            // Add event listeners to delete buttons
             document.querySelectorAll(".delete-btn").forEach((btn) => {
               btn.addEventListener("click", function () {
                 const problemId = this.getAttribute("data-id");
@@ -150,98 +152,56 @@
             });
           })
           .catch((error) => {
-            console.error("[Frontend] Error loading problems:", error);
-            console.error("[Frontend] Error details:", error);
             problemsTable.innerHTML = `<tr><td colspan="6">خطأ في تحميل المسائل: ${error.message || 'Unknown error'}</td></tr>`;
+            showToast("خطأ في تحميل المسائل: " + error.message, "error");
           });
       }
+
       function deleteProblem(problemId) {
-  if (!confirm("هل انت متأكد من مسح المسألة؟")) return;
+        if (!confirm("هل انت متأكد من مسح المسألة؟")) return;
 
-  const button = document.querySelector(`button[data-id="${problemId}"]`);
+        const button = document.querySelector(`button[data-id="${problemId}"]`);
+        const book = button.getAttribute('data-book');
+        const page = parseInt(button.getAttribute('data-page'));
+        const numberOfProblem = parseInt(button.getAttribute('data-number'));
+        const chapter = parseInt(button.getAttribute('data-chapter'));
+        const level = parseInt(button.getAttribute('data-level'));
 
-  // Get data from button attributes instead of table cells to avoid parsing issues
-  const book = button.getAttribute('data-book');
-  const page = parseInt(button.getAttribute('data-page'));
-  const numberOfProblem = parseInt(button.getAttribute('data-number'));
-  const chapter = parseInt(button.getAttribute('data-chapter'));
-  const level = parseInt(button.getAttribute('data-level'));
+        const data = { book, page, numberOfProblem, chapter, level };
 
-  const data = {
-    book,
-    page,
-    numberOfProblem,
-    chapter,
-    level
-  };
-
-  console.log("[Frontend] Deleting problem:", data);
-
-  fetch("http://localhost:5000/api/Problem/remove", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-    .then((response) => {
-      console.log("[Frontend] Delete response status:", response.status);
-      if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.message || err.error || "لم يتم مسح المسألة");
-        }).catch(jsonError => {
-          // If response is not JSON, throw generic error
-          if (jsonError.message) throw jsonError;
-          throw new Error(`HTTP ${response.status}: لم يتم مسح المسألة`);
+        fetch("http://localhost:5000/api/Problem/remove", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.message || err.error || "لم يتم مسح المسألة"); })
+                   .catch(jsonError => { if (jsonError.message) throw jsonError; throw new Error(`HTTP ${response.status}: لم يتم مسح المسألة`); });
+          }
+          return response.json();
+        })
+        .then((result) => {
+          loadProblems();
+          showToast(result.message || "تم مسح المسألة من جميع الطلاب", "success");
+        })
+        .catch((error) => {
+          showToast("لم يتم مسح المسألة: " + error.message, "error");
         });
       }
-      return response.json();
-    })
-    .then((result) => {
-      console.log("[Frontend] Delete successful:", result);
-      loadProblems(); // Refresh the table
-      messageDiv.textContent = result.message || "تم مسح المسألة من جميع الطلاب";
-      messageDiv.style.color = "green";
-    })
-    .catch((error) => {
-      console.error("[Frontend] Error deleting problem:", error);
-      messageDiv.textContent = "لم يتم مسح المسألة: " + error.message;
-      messageDiv.style.color = "red";
-    });
-}
-
 
       function getChapterName(index) {
-        const chapters = [
-          "Ch1",
-          "Ch2",
-          "Ch3",
-          "Ch4",
-          "ModernPhysics",
-          "Ch8",
-          "Kirchhoff",
-        ];
+        const chapters = ["Ch1","Ch2","Ch3","Ch4","ModernPhysics","Ch8","Kirchhoff"];
         return chapters[index] || "Unknown";
       }
 
       function getLevelName(index) {
-        const levels = [
-          "Yellow",
-          "Green",
-          "Red",
-          "Black",
-          "Blue",
-          "Gold",
-          "Platinum",
-          "Diamond",
-        ];
+        const levels = ["Yellow","Green","Red","Black","Blue","Gold","Platinum","Diamond"];
         return levels[index] || "Unknown";
       }
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        messageDiv.textContent = "";
-        messageDiv.style.color = "";
 
         const problem = {
           book: document.getElementById("book").value,
@@ -252,22 +212,16 @@
         };
 
         try {
-          // Try new centralized system first
           let response = await fetch("http://localhost:5000/api/problems", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(problem),
           });
 
           if (!response.ok) {
-            // Fallback to old system if new system fails (e.g., no students)
             response = await fetch("http://localhost:5000/api/Problem/assign", {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify(problem),
             });
           }
@@ -275,13 +229,9 @@
           if (!response.ok) throw new Error("Failed to assign problem");
           
           loadProblems();
-          messageDiv.textContent = "تم إضافة المسألة بنجاح";
-          messageDiv.style.color = "green";
-         // form.reset();
+          showToast("تم إضافة المسألة بنجاح", "success");
         } catch (error) {
-          console.error("Error assigning problem:", error);
-          messageDiv.textContent = "حدث خطأ في إضافة المسألة: " + error.message;
-          messageDiv.style.color = "red";
+          showToast("حدث خطأ في إضافة المسألة: " + error.message, "error");
         }
       });
     </script>

@@ -7,24 +7,33 @@
     "group": "jjj",
     "remainingProblems": [
       4,
-      6,
-      8,
-      10,
       11,
-      12,
-      10,
       11,
-      12,
       14,
-      12,
       13,
       15,
-      16
+      16,
+      18,
+      21
     ],
-    "solvedProblems": [],
+    "solvedProblems": [
+      10,
+      20,
+      17,
+      6,
+      8,
+      12,
+      19,
+      22,
+      23,
+      24
+    ],
     "completedLevels": [
+      "0-2",
+      "2-0",
       "0-0",
-      "0-2"
+      "2-2",
+      "0-1"
     ],
     "assignedProblems": [],
     "attendances": [
@@ -58,8 +67,8 @@
         "attendanceId": 3,
         "weekStartDate": "2025-11-21T22:00:00.000Z",
         "weekEndDate": "2025-11-27T22:00:00.000Z",
-        "isPresent": false,
-        "notes": "Absent automatically (no attendance recorded)"
+        "isPresent": true,
+        "notes": ""
       },
       {
         "studentId": 1,
@@ -75,7 +84,7 @@
         "weekStartDate": null,
         "weekEndDate": null,
         "isPresent": true,
-        "notes": "m",
+        "notes": "ml;lk",
         "date": "2025-11-28"
       },
       {
@@ -93,9 +102,26 @@
         "weekEndDate": "2025-11-27T22:00:00.000Z",
         "isPresent": false,
         "notes": "Absent automatically (no attendance recorded)"
+      },
+      {
+        "attendanceId": null,
+        "studentId": 1,
+        "weekStartDate": null,
+        "weekEndDate": null,
+        "isPresent": true,
+        "notes": "50",
+        "date": "2025-11-27"
       }
     ],
-    "chapterLevels": {}
+    "chapterLevels": {
+      "Ch1": "Red",
+      "Ch2": "Yellow",
+      "Ch3": "Black",
+      "Ch4": "Yellow",
+      "ModernPhysics": "Yellow",
+      "Ch8": "Yellow",
+      "Kirchhoff": "Yellow"
+    }
   },
   {
     "studentId": 2,
@@ -110,7 +136,15 @@
       13,
       14,
       15,
-      16
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
     ],
     "solvedProblems": [
       1,
@@ -124,9 +158,6 @@
       10
     ],
     "completedLevels": [
-      "0-0",
-      "0-1",
-      "2-0",
       "0-2",
       "1-0"
     ],
@@ -224,13 +255,37 @@
         "weekEndDate": "2025-11-27T22:00:00.000Z",
         "isPresent": false,
         "notes": "Absent automatically (no attendance recorded)"
+      },
+      {
+        "studentId": null,
+        "attendanceId": 5,
+        "weekStartDate": "2025-11-21T22:00:00.000Z",
+        "weekEndDate": "2025-11-27T22:00:00.000Z",
+        "isPresent": false,
+        "notes": "Absent automatically (no attendance recorded)"
+      },
+      {
+        "studentId": null,
+        "attendanceId": 6,
+        "weekStartDate": "2025-11-21T22:00:00.000Z",
+        "weekEndDate": "2025-11-27T22:00:00.000Z",
+        "isPresent": false,
+        "notes": "Absent automatically (no attendance recorded)"
       }
     ],
     "remainingProblems": [
       13,
       14,
       15,
-      16
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
     ],
     "solvedProblems": [],
     "completedLevels": [],
@@ -274,14 +329,22 @@
         "weekStartDate": null,
         "weekEndDate": null,
         "isPresent": true,
-        "notes": "",
+        "notes": "5000000",
         "date": "2025-11-28"
       }
     ],
     "remainingProblems": [
       13,
       14,
-      15
+      15,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
     ],
     "solvedProblems": [
       1,
@@ -293,7 +356,6 @@
       16
     ],
     "completedLevels": [
-      "0-0",
       "1-0",
       "0-5"
     ],
@@ -353,12 +415,28 @@
         "weekStartDate": null,
         "weekEndDate": null,
         "isPresent": true,
-        "notes": "",
+        "notes": "500",
         "date": "2025-11-28"
       },
       {
         "studentId": 5,
         "attendanceId": 5,
+        "weekStartDate": "2025-11-21T22:00:00.000Z",
+        "weekEndDate": "2025-11-27T22:00:00.000Z",
+        "isPresent": false,
+        "notes": "Absent automatically (no attendance recorded)"
+      },
+      {
+        "studentId": 5,
+        "attendanceId": 6,
+        "weekStartDate": "2025-11-21T22:00:00.000Z",
+        "weekEndDate": "2025-11-27T22:00:00.000Z",
+        "isPresent": false,
+        "notes": "Absent automatically (no attendance recorded)"
+      },
+      {
+        "studentId": 5,
+        "attendanceId": 7,
         "weekStartDate": "2025-11-21T22:00:00.000Z",
         "weekEndDate": "2025-11-27T22:00:00.000Z",
         "isPresent": false,
@@ -369,7 +447,15 @@
       13,
       14,
       15,
-      16
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
     ],
     "solvedProblems": [],
     "completedLevels": [],
@@ -413,10 +499,122 @@
       13,
       14,
       15,
-      16
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
     ],
     "solvedProblems": [],
     "completedLevels": [],
     "chapterLevels": {}
+  },
+  {
+    "studentId": 10,
+    "name": "فارس سمير محمد سعيد عبدالمولي",
+    "number": "50",
+    "parentNumber": "0000000000",
+    "group": "G1",
+    "remainingProblems": [
+      3,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "solvedProblems": [],
+    "completedLevels": [],
+    "assignedProblems": [],
+    "attendances": [
+      {
+        "studentId": 10,
+        "attendanceId": 1,
+        "weekStartDate": "2025-11-21T22:00:00.000Z",
+        "weekEndDate": "2025-11-27T22:00:00.000Z",
+        "isPresent": false,
+        "notes": "Absent automatically (no attendance recorded)"
+      }
+    ]
+  },
+  {
+    "studentId": 52212,
+    "name": "Fares",
+    "number": "0000000000",
+    "parentNumber": "0000000000",
+    "group": "g1",
+    "remainingProblems": [
+      4,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "solvedProblems": [],
+    "completedLevels": [],
+    "assignedProblems": [],
+    "attendances": []
+  },
+  {
+    "studentId": 500000000,
+    "name": "عمر محمد عباس",
+    "number": "0000000000",
+    "parentNumber": "0000000000",
+    "group": "G1",
+    "remainingProblems": [
+      4,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "solvedProblems": [],
+    "completedLevels": [],
+    "assignedProblems": [],
+    "attendances": []
   }
 ]

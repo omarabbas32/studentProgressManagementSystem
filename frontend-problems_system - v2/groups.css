@@ -1,0 +1,205 @@
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    direction: rtl;
+    font-family: "Lalezar", system-ui;
+
+}
+
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url("img/2.png") no-repeat center center;
+    background-size: cover;
+    z-index: -1;
+}
+
+.groups-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(11, 22, 63, 0.85);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    padding: 35px 45px;
+    width: 75%;
+    max-height: 80vh;
+    overflow-y: auto;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Titles */
+.groups-container h2 {
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+/* Input & Button */
+.groups-container input,
+.groups-container button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+}
+
+.groups-container input {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: background 0.3s;
+}
+
+.groups-container input:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.groups-container button {
+    background-color: white;
+    color: #0b163f;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.groups-container button:hover {
+    background-color: #d9d9d9;
+}
+
+/* Recent Searches */
+.recent-searches {
+    width: 100%;
+    margin: 15px 0;
+}
+
+.recent-searches p {
+    margin-bottom: 10px;
+    font-size: 0.95em;
+    color: #ffffff;
+}
+
+.recent-tag {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 0.9em;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin: 5px 5px 0 0;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.recent-tag:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Results Cards */
+.results-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.student-card {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0b163f;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: right;
+}
+
+.student-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Student Info */
+.student-info h3 {
+    margin-bottom: 6px;
+    font-size: 1.15em;
+}
+
+.student-info p {
+    margin: 3px 0;
+    font-size: 0.9em;
+    color: #333;
+}
+
+/* Back Button */
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    background-color: white;
+    color: #0b163f;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 3;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background-color: #bfbfbf;
+}
+
+/* No Results */
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: white;
+    font-size: 1em;
+}
+
+/* Scrollbar customization */
+.groups-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.groups-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.groups-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .groups-container {
+        padding: 25px 30px;
+        width: 95%;
+    }
+
+    .student-info h3 {
+        font-size: 1em;
+    }
+
+    .student-info p {
+        font-size: 0.85em;
+    }
+}

@@ -4,126 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البحث بالمجموعات</title>
-    <link rel="stylesheet" href="index.css">
-    <style>
-        body {
-            overflow-y: auto;
-        }
-        
-        .groups-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            background-color: rgba(0, 4, 62, 0.7);
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
-            border-radius: 10px;
-            padding: 30px 40px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .groups-container h2 {
-            margin-bottom: 20px;
-            color: white;
-        }
-        
-        .recent-searches {
-            margin: 15px 0;
-            width: 100%;
-        }
-        
-        .recent-searches p {
-            color: white;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-        }
-        
-        .recent-tag {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 15px;
-            border-radius: 15px;
-            margin: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            color: white;
-            transition: background 0.3s;
-        }
-        
-        .recent-tag:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .results-container {
-            margin-top: 20px;
-            width: 100%;
-        }
-        
-        .student-card {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: right;
-        }
-        
-        .student-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            background: white;
-        }
-        
-        .student-info h3 {
-            margin: 0 0 8px 0;
-            color: #0b163f;
-            font-size: 1.1em;
-        }
-        
-        .student-info p {
-            margin: 4px 0;
-            color: #555;
-            font-size: 0.9em;
-        }
-        
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background: white;
-            color: #0b163f;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 3;
-        }
-        
-        .back-btn:hover {
-            background: #bfbfbf;
-        }
-        
-        .no-results {
-            text-align: center;
-            color: white;
-            padding: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="groups.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
     <div class="background-image"></div>
     
-    <button class="back-btn" onclick="window.location.href='index.html'">عودة</button>
+    <button class="back-btn" onclick="window.location.href='index.html'">رجوع</button>
 
     <div class="groups-container">
         <h2>البحث عن مجموعة</h2>
@@ -139,6 +27,9 @@
             <!-- Results will appear here -->
         </div>
     </div>
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script>
         const API_BASE = "http://localhost:5000/api";
@@ -158,7 +49,13 @@
         function handleSearch() {
             const groupName = groupInput.value.trim();
             if (!groupName) {
-                alert("من فضلك اكتب اسم المجموعة");
+                Toastify({
+                    text: "من فضلك اكتب اسم المجموعة",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "center",
+                    backgroundColor: "#b00020"
+                }).showToast();
                 return;
             }
 
@@ -177,6 +74,13 @@
                 .catch(err => {
                     console.error(err);
                     resultsList.innerHTML = '<p class="no-results">حدث خطأ أثناء البحث</p>';
+                    Toastify({
+                        text: "حدث خطأ أثناء البحث",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "center",
+                        backgroundColor: "#b00020"
+                    }).showToast();
                 });
         }
 
@@ -211,13 +115,9 @@
 
         function addToRecent(groupName) {
             let recent = JSON.parse(localStorage.getItem("recentGroups") || "[]");
-            // Remove if exists to add to top
             recent = recent.filter(g => g.toLowerCase() !== groupName.toLowerCase());
-            // Add to beginning
             recent.unshift(groupName);
-            // Keep only last 5
             recent = recent.slice(0, 5);
-            
             localStorage.setItem("recentGroups", JSON.stringify(recent));
             loadRecentSearches();
         }

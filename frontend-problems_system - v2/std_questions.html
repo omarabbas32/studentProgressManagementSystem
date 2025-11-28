@@ -6,6 +6,8 @@
   <title>Questions</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="std_questions.css">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="container">
@@ -50,39 +52,39 @@
   </div>
 
   <script>
+    // دالة عرض SweetAlert
+    function showAlert(msg, type="success") {
+      Swal.fire({
+        icon: type,
+        title: type === "success" ? "نجاح" : "خطأ",
+        text: msg,
+        confirmButtonText: "حسناً"
+      });
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
       const baseUrl = "http://localhost:5000";
       const studentId = localStorage.getItem('studentId');
       const chapter = localStorage.getItem('chapter');
       const level = localStorage.getItem('level');
-     const nextLevel= level+1;
+
       if (!studentId || !chapter || !level) {
-        alert('بيانات الطالب غير متوفرة، يرجى العودة للصفحة السابقة');
+        showAlert('بيانات الطالب غير متوفرة، يرجى العودة للصفحة السابقة', 'error');
         return;
       }
-  
+
       document.getElementById("addEditForm").addEventListener("submit", function (e) {
-        e.preventDefault();  // Prevent the default form submission
-  
+        e.preventDefault();
+
         const page = parseInt(document.getElementById("page_number").value);
         const questionNumber = parseInt(document.getElementById("question_number").value);
         const bookName = document.getElementById("book_name").value.trim();
-  
+
         if (!page || !questionNumber || !bookName) {
-          alert('يرجى ملء جميع الحقول');
+          showAlert('يرجى ملء جميع الحقول', 'error');
           return;
         }
-  
-        const studentId = localStorage.getItem('studentId');
-        const chapter = localStorage.getItem('chapter');
-        const level = localStorage.getItem('level');
-       
-        if (!studentId || !chapter || !level) {
-          alert('بيانات الطالب غير متوفرة، يرجى العودة للصفحة السابقة');
-          return;
-        }
-  
-        // Try new centralized system first (POST /api/problems)
+
         const problem = {
           book: bookName,
           page: page,
@@ -93,131 +95,91 @@
 
         fetch(`${baseUrl}/api/problems`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: {"Content-Type": "application/json"},
           body: JSON.stringify(problem),
         })
-          .then(response => {
-            if (!response.ok) throw new Error("فشل في إضافة المسألة");
-            return response.json();
+        .then(response => { if(!response.ok) throw new Error("فشل في إضافة المسألة"); return response.json(); })
+        .then(data => {
+          showAlert('تم إضافة المسألة بنجاح! تم تحديث جميع الطلاب.');
+          fetchQuestions();
+          document.getElementById("addEditForm").reset();
+        })
+        .catch(error => {
+          console.error(error);
+          const oldProblem = {
+            studentId: studentId,
+            chapterIndex: parseInt(chapter),
+            levelIndex: parseInt(level),
+            book: bookName,
+            page: page,
+            numberOfQuestion: questionNumber
+          };
+          fetch(`${baseUrl}/api/Students/add-problem`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(oldProblem),
           })
+          .then(response => { if(!response.ok) throw new Error("فشل في إضافة المسألة"); return response.json(); })
           .then(data => {
-            alert('تم إضافة المسألة بنجاح! تم تحديث جميع الطلاب.');
-            fetchQuestions(); // Refresh the list
+            showAlert('تم إضافة المسألة بنجاح');
+            fetchQuestions();
             document.getElementById("addEditForm").reset();
           })
-          .catch(error => {
-            console.error('خطأ أثناء إضافة المسألة:', error);
-            // Fallback to old system
-            const oldProblem = {
-              studentId: studentId,
-              chapterIndex: parseInt(chapter),
-              levelIndex: parseInt(level),
-              book: bookName,
-              page: page,
-              numberOfQuestion: questionNumber
-            };
-            fetch(`${baseUrl}/api/Students/add-problem`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(oldProblem),
-            })
-              .then(response => {
-                if (!response.ok) throw new Error("فشل في إضافة المسألة");
-                return response.json();
-              })
-              .then(data => {
-                alert('تم اضافه المسألة بنجاح');
-                fetchQuestions();
-                document.getElementById("addEditForm").reset();
-              })
-              .catch(err => {
-                alert('حدث خطأ: ' + err.message);
-              });
-          });
+          .catch(err => showAlert('حدث خطأ: ' + err.message, 'error'));
+        });
       });
-  
+
       function fetchQuestions() {
-        console.log(`[Frontend] Fetching problems for student ${studentId}, chapter ${chapter}, level ${level}`);
-        
-        // Try new system first (GET /api/Students/:id/problems)
         fetch(`${baseUrl}/api/Students/${studentId}/problems`)
-          .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
-          })
-          .then(data => {
-            console.log(`[Frontend] Received ${data.problems ? data.problems.length : 0} total problems`);
-            
-            // Filter problems by chapter and level - show ALL problems (solved and remaining)
-            const filteredProblems = (data.problems || []).filter(p => 
-              parseInt(p.chapter) === parseInt(chapter) && 
-              parseInt(p.level) === parseInt(level)
-            );
-            
-            console.log(`[Frontend] Filtered to ${filteredProblems.length} problems for chapter ${chapter}, level ${level}`);
-            
-            // Sort: show remaining problems first, then solved ones
-            filteredProblems.sort((a, b) => {
-              if (a.isSolved === b.isSolved) return 0;
-              return a.isSolved ? 1 : -1; // remaining first
-            });
-            
-            // Show level completion status if all problems are solved
-            const allSolved = filteredProblems.length > 0 && filteredProblems.every(p => p.isSolved);
-            if (allSolved && filteredProblems.length > 0) {
-              const levelCompletionMsg = document.createElement('div');
-              levelCompletionMsg.className = 'level-completed';
-              levelCompletionMsg.innerHTML = '<strong>✅ تم إكمال جميع المسائل في هذا المستوى!</strong>';
-              const questionsTable = document.querySelector("#questionsTable");
-              if (questionsTable) {
-                const h2 = questionsTable.querySelector("h2");
-                if (h2) {
-                  questionsTable.insertBefore(levelCompletionMsg, h2);
-                  setTimeout(() => levelCompletionMsg.remove(), 5000);
-                }
+        .then(response => { if(!response.ok) throw new Error('Network response was not ok'); return response.json(); })
+        .then(data => {
+          const filteredProblems = (data.problems || []).filter(p => 
+            parseInt(p.chapter) === parseInt(chapter) && parseInt(p.level) === parseInt(level)
+          );
+          filteredProblems.sort((a,b) => a.isSolved === b.isSolved ? 0 : a.isSolved ? 1 : -1);
+
+          const allSolved = filteredProblems.length > 0 && filteredProblems.every(p => p.isSolved);
+          if(allSolved && filteredProblems.length > 0){
+            const levelCompletionMsg = document.createElement('div');
+            levelCompletionMsg.className = 'level-completed';
+            levelCompletionMsg.innerHTML = '<strong>✅ تم إكمال جميع المسائل في هذا المستوى!</strong>';
+            const questionsTable = document.querySelector("#questionsTable");
+            if (questionsTable) {
+              const h2 = questionsTable.querySelector("h2");
+              if (h2) {
+                questionsTable.insertBefore(levelCompletionMsg, h2);
+                setTimeout(() => levelCompletionMsg.remove(), 5000);
               }
             }
-            
-            renderQuestions(filteredProblems);
-          })
-          .catch(error => {
-            console.error("Error fetching questions:", error);
-            // Fallback to old system
-            fetch(`${baseUrl}/api/Students/problems/${studentId}/${chapter}/${level}`)
-              .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-              })
-              .then(data => renderQuestions(data))
-              .catch(err => {
-                console.error("Fallback also failed:", err);
-                document.querySelector("#questionsList tbody").innerHTML = `
-                  <tr>
-                    <td colspan="5" style="color: red;">حدث خطأ أثناء جلب البيانات: ${err.message}</td>
-                  </tr>
-                `;
-              });
+          }
+
+          renderQuestions(filteredProblems);
+        })
+        .catch(error => {
+          console.error(error);
+          fetch(`${baseUrl}/api/Students/problems/${studentId}/${chapter}/${level}`)
+          .then(response => { if(!response.ok) throw new Error('Network response was not ok'); return response.json(); })
+          .then(data => renderQuestions(data))
+          .catch(err => {
+            document.querySelector("#questionsList tbody").innerHTML = `
+              <tr>
+                <td colspan="5" style="color: red;">حدث خطأ أثناء جلب البيانات: ${err.message}</td>
+              </tr>
+            `;
           });
+        });
       }
-  
+
       function renderQuestions(questions) {
         const questionsTable = document.querySelector("#questionsList tbody");
-        questionsTable.innerHTML = questions?.length ? "" : `
-          <tr>
-            <td colspan="5">لا توجد أسئلة متاحة</td>
-          </tr>
-        `;
+        questionsTable.innerHTML = questions?.length ? "" : `<tr><td colspan="5">لا توجد أسئلة متاحة</td></tr>`;
 
         questions?.forEach(question => {
           const row = document.createElement("tr");
           const isSolved = question.isSolved || false;
           const statusClass = isSolved ? 'solved' : 'remaining';
           const statusText = isSolved ? '✅ تم الحل' : '⏳ قيد الحل';
-          
+
           row.innerHTML = `
             <td>${question.book || 'غير محدد'}</td>
             <td>${question.page || '--'}</td>
@@ -231,101 +193,98 @@
           questionsTable.appendChild(row);
         });
 
-        // Add solve button handlers
         document.querySelectorAll(".solve-btn").forEach(btn => {
           btn.addEventListener("click", function (e) {
             const problemId = e.target.closest('button').getAttribute('data-id');
-            if (confirm('هل أنت متأكد من حل هذا السؤال؟')) {
-              fetch(`${baseUrl}/api/Students/${studentId}/solve/${problemId}`, {
-                method: 'PUT'
-              })
-                .then(response => {
-                  if (!response.ok) throw new Error('فشل في حل السؤال');
-                  return response.json();
-                })
+            Swal.fire({
+              title: 'هل أنت متأكد من حل هذا السؤال؟',
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonText: 'نعم',
+              cancelButtonText: 'إلغاء'
+            }).then(result => {
+              if(result.isConfirmed){
+                fetch(`${baseUrl}/api/Students/${studentId}/solve/${problemId}`, {method: 'PUT'})
+                .then(res => { if(!res.ok) throw new Error('فشل في حل السؤال'); return res.json(); })
                 .then(data => {
-                  alert('تم حل السؤال بنجاح! السؤال الآن في قائمة المسائل المحلولة');
-                  if (data.student && data.student.levelCompleted) {
-                    alert('مبروك! لقد أكملت جميع المسائل في هذا المستوى! 🎉');
-                  }
-                  fetchQuestions(); // Refresh the list - will show solved problem with different status
+                  showAlert('تم حل السؤال بنجاح!');
+                  if(data.student?.levelCompleted) showAlert('مبروك! تم إكمال جميع المسائل في هذا المستوى! 🎉');
+                  fetchQuestions();
                 })
-                .catch(error => {
-                  console.error('Error:', error);
-                  alert('حدث خطأ أثناء حل السؤال: ' + error.message);
-                });
-            }
+                .catch(err => showAlert('حدث خطأ أثناء حل السؤال: ' + err.message, 'error'));
+              }
+            });
           });
         });
 
         document.querySelectorAll(".delete").forEach(btn => {
           btn.addEventListener("click", function (e) {
             const problemId = e.target.closest('button').getAttribute('data-id');
-            if (confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
-              fetch(`${baseUrl}/api/Students/${studentId}/problem/${problemId}`, {
-                method: 'DELETE'
-              })
-                .then(response => {
-                  if (!response.ok) throw new Error('فشل في حذف السؤال');
-                  alert('تم حذف السؤال بنجاح');
-                  fetchQuestions(); // Refresh the list
-                })
-                .catch(error => {
-                  console.error('Error:', error);
-                  alert('حدث خطأ أثناء الحذف: ' + error.message);
-                });
-            }
+            Swal.fire({
+              title: 'هل أنت متأكد من حذف هذا السؤال؟',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'نعم',
+              cancelButtonText: 'إلغاء'
+            }).then(result => {
+              if(result.isConfirmed){
+                fetch(`${baseUrl}/api/Students/${studentId}/problem/${problemId}`, {method: 'DELETE'})
+                .then(res => { if(!res.ok) throw new Error('فشل في حذف السؤال'); showAlert('تم حذف السؤال بنجاح'); fetchQuestions(); })
+                .catch(err => showAlert('حدث خطأ أثناء الحذف: ' + err.message, 'error'));
+              }
+            });
           });
         });
       }
-  
+
       document.getElementById("finishLevelBtn").addEventListener("click", async function () {
-        if (!confirm("هل أنت متأكد أنك تريد إنهاء هذا المستوى؟ سيتم حل جميع المسائل في هذا المستوى تلقائياً.")) return;
-        
+        const result = await Swal.fire({
+          title: 'هل أنت متأكد؟',
+          text: "سيتم حل جميع المسائل في هذا المستوى تلقائياً.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'نعم، انهي المستوى!',
+          cancelButtonText: 'إلغاء'
+        });
+
+        if (!result.isConfirmed) return;
+
         try {
-          // Call the finish level endpoint to mark all problems as solved
           const response = await fetch(`${baseUrl}/api/Students/${studentId}/finish-level`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              chapter: parseInt(chapter),
-              level: parseInt(level)
-            })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chapter: parseInt(chapter), level: parseInt(level)})
           });
-          
+
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || 'فشل في إنهاء المستوى');
           }
-          
+
           const data = await response.json();
-          
-          // Success message
-          alert(data.message || "تم إنهاء المستوى بنجاح!");
-          
-          // Refresh the questions list to show all problems as solved
+          showAlert(data.message || "تم إنهاء المستوى بنجاح!");
           fetchQuestions();
-          
-          // If level was completed and student moved to next level, show message
-          if (data.student && data.student.currentLevel) {
-            const levelNames = ["Yellow", "Green", "Red", "Black", "Blue", "Gold", "Platinum", "Diamond"];
+
+          if(data.student?.currentLevel) {
+            const levelNames = ["Yellow","Green","Red","Black","Blue","Gold","Platinum","Diamond"];
             const newLevelIndex = levelNames.indexOf(data.student.currentLevel);
-            if (newLevelIndex > parseInt(level)) {
-              alert(`مبروك! تم الانتقال تلقائياً إلى المستوى التالي: ${data.student.currentLevel} 🎉`);
+            if(newLevelIndex > parseInt(level)) {
+              Swal.fire({
+                title: '🎉 مبروك!',
+                text: `تم الانتقال تلقائياً إلى المستوى التالي: ${data.student.currentLevel}`,
+                icon: 'success',
+                confirmButtonText: 'حسناً'
+              });
             }
           }
-        } catch (error) {
-          console.error('Error:', error);
-          alert("حدث خطأ: " + error.message);
+
+        } catch(err) {
+          showAlert("حدث خطأ: " + err.message, 'error');
         }
       });
-     
-  
+
       fetchQuestions();
     });
   </script>
-  
 </body>
 </html>

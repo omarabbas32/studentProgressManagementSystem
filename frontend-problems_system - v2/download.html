@@ -14,6 +14,8 @@
     />
     <link rel="stylesheet" href="downloaddata.css" />
     <link rel="stylesheet" href="download.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   </head>
   <body>
     <div class="container">
@@ -47,8 +49,13 @@
         <button onclick="downloadAbsentCSV()">تحميل غياب الإسبوع</button>
       </div>
     </div>
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <script>
         let baseAPi =`http://localhost:5000`;
+
         function downloadFile(url, fileName) {
           fetch(url)
             .then(response => {
@@ -70,7 +77,13 @@
               a.remove();
             })
             .catch(error => {
-              alert("حدث خطأ أثناء تحميل الملف: " + error.message);
+              Toastify({
+                text: "حدث خطأ أثناء تحميل الملف: " + error.message,
+                duration: 4000,
+                gravity: "top",
+                position: "center",
+                backgroundColor: "#b00020",
+              }).showToast();
             });
         }
       
@@ -92,7 +105,6 @@
           const apiUrl = `${baseAPi}/api/Download/absent/current-week`;
           downloadFile(apiUrl, `absent_current_week.xlsx`);
         }
-      </script>
-      
+    </script>
   </body>
 </html>

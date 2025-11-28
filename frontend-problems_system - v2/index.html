@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>search and attendance</title>
     <link rel="stylesheet" href="index.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
     <style>
       /* Add these styles for the chapter selection */
       .chapter-container {
@@ -85,54 +88,44 @@
         <option value="6">كيرشوف</option>
       </select>
     </div>
-    
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <script>
       // Chapter storage with 1-day expiration
       document.addEventListener("DOMContentLoaded", function() {
-  // Load saved chapter if exists
-  const thisweekchapter = localStorage.getItem('thisweekchapter');
-  
-  if (thisweekchapter) {
-    document.getElementById("thisweekchapter").value = thisweekchapter;
-  }
-  
-  // Save chapter when changed
-  document.getElementById("thisweekchapter").addEventListener("change", function() {
-    // Store directly for API compatibility
-    localStorage.setItem("thisweekchapter", this.value);
-  });
-});
+        const thisweekchapter = localStorage.getItem('thisweekchapter');
+        if (thisweekchapter) {
+          document.getElementById("thisweekchapter").value = thisweekchapter;
+        }
+        document.getElementById("thisweekchapter").addEventListener("change", function() {
+          localStorage.setItem("thisweekchapter", this.value);
+        });
+      });
 
-// If you still want expiration functionality, keep these but use a different key
-function setWithExpiration(key, value, ttl) {
-  const now = new Date();
-  const item = {
-    value: value,
-    expiration: now.getTime() + ttl
-  };
-  localStorage.setItem(key, JSON.stringify(item));
-}
+      function setWithExpiration(key, value, ttl) {
+        const now = new Date();
+        const item = { value: value, expiration: now.getTime() + ttl };
+        localStorage.setItem(key, JSON.stringify(item));
+      }
 
-function getWithExpiration(key) {
-  const itemStr = localStorage.getItem(key);
-  if (!itemStr) return null;
-  
-  try {
-    const item = JSON.parse(itemStr);
-    const now = new Date();
-    
-    if (now.getTime() > item.expiration) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return item.value;
-  } catch (e) {
-    // If parsing fails, return the direct value
-    return itemStr;
-  }
-}
+      function getWithExpiration(key) {
+        const itemStr = localStorage.getItem(key);
+        if (!itemStr) return null;
+        try {
+          const item = JSON.parse(itemStr);
+          const now = new Date();
+          if (now.getTime() > item.expiration) {
+            localStorage.removeItem(key);
+            return null;
+          }
+          return item.value;
+        } catch (e) {
+          return itemStr;
+        }
+      }
 
-      // Rest of the existing functionality
       const API_BASE = "http://localhost:5000/api";
       const searchType = document.getElementById("searchType");
       const searchInput = document.getElementById("searchInput");
@@ -141,7 +134,6 @@ function getWithExpiration(key) {
       const attendanceInput = document.getElementById("attendanceInput");
       const attendanceBtn = document.getElementById("attendanceBtn");
 
-      // Update placeholder based on search type
       searchType.addEventListener("change", () => {
         searchInput.placeholder = searchType.value === "name" 
           ? "اكتب الاسم" 
@@ -150,18 +142,27 @@ function getWithExpiration(key) {
         searchInput.value = "";
       });
 
-      // Handle search
       searchBtn.addEventListener("click", handleSearch);
       searchInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") handleSearch();
       });
+
+      function showToast(msg, bg="#0b163f") {
+        Toastify({
+          text: msg,
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: bg,
+        }).showToast();
+      }
 
       function handleSearch() {
         const value = searchInput.value.trim();
         const type = searchType.value;
 
         if (!value) {
-          alert("من فضلك اكتب قيمة للبحث");
+          showToast("من فضلك اكتب قيمة للبحث", "#b00020");
           return;
         }
 
@@ -173,10 +174,10 @@ function getWithExpiration(key) {
                 localStorage.setItem("studentId", data.studentId);
                 window.location.href = "profile.html";
               } else {
-                alert("الطالب غير موجود");
+                showToast("الطالب غير موجود", "#b00020");
               }
             })
-            .catch(() => alert("حدث خطأ أثناء البحث"));
+            .catch(() => showToast("حدث خطأ أثناء البحث", "#b00020"));
         } else {
           fetch(`${API_BASE}/Students/search-name?name=${encodeURIComponent(value)}`)
             .then(res => res.json())
@@ -195,17 +196,16 @@ function getWithExpiration(key) {
                 resultsList.style.display = "block";
               } else {
                 resultsList.style.display = "none";
-                alert("لا يوجد نتائج مطابقة");
+                showToast("لا يوجد نتائج مطابقة", "#b00020");
               }
             })
             .catch(err => {
               console.error("Error fetching students:", err);
-              alert("حدث خطأ أثناء جلب الأسماء");
+              showToast("حدث خطأ أثناء جلب الأسماء", "#b00020");
             });
         }
       }
 
-      // Handle attendance
       attendanceBtn.addEventListener("click", handleAttendance);
       attendanceInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") handleAttendance();
@@ -213,31 +213,25 @@ function getWithExpiration(key) {
 
       function handleAttendance() {
         const value = attendanceInput.value.trim();
-
         if (!value) {
-          alert("من فضلك اكتب كود الطالب");
+          showToast("من فضلك اكتب كود الطالب", "#b00020");
           return;
         }
       
         fetch(`${API_BASE}/Attendance/${value}`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            isPresent: true,
-            notes: ""
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPresent: true, notes: "" })
         })
         .then(res => {
           if (!res.ok) throw new Error();
           return res.json();
         })
         .then(data => {
-          alert("✅ تم تسجيل الحضور بنجاح");
+          showToast("✅ تم تسجيل الحضور بنجاح", "#28a745");
           attendanceInput.value = "";
         })
-        .catch(() => alert("❌ الطالب غير موجود أو حدث خطأ أثناء تسجيل الحضور"));
+        .catch(() => showToast("❌ الطالب غير موجود أو حدث خطأ أثناء تسجيل الحضور", "#b00020"));
       }
     </script>
   </body>

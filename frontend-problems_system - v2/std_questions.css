@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+
 * {
   font-family: "Lalezar", system-ui;
   font-weight: 600;
@@ -7,6 +8,7 @@
   box-sizing: border-box;
   scroll-behavior: smooth;
 }
+
 body {
   background: url(img/2.png) no-repeat center center fixed;
   background-size: cover;
@@ -26,7 +28,8 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-h1, h2 {
+h1,
+h2 {
   text-align: center;
   font-size: 24px;
   color: #0b163f;
@@ -92,6 +95,7 @@ td {
   padding: 12px;
   text-align: center;
 }
+
 th,
 td:hover {
   background-color: #0b163f54;
@@ -194,4 +198,22 @@ td {
 
 .finish-level-btn i {
   margin-left: 8px;
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 15px;
+  padding: 12px 20px;
+  background-color: #ffffff;
+  color: #0b163f;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  color: #ffffff;
+  background-color: #0b163f;
 }

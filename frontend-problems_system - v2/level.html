@@ -5,16 +5,23 @@
   <title>Levels</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="level.css">
+  <!-- Toastify CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <style>
-    /* I have removed the .level-card.empty::after rule.
-      The "Done" text will no longer appear.
-    */
-
     /* Style for the current level display */
     .current-level-container {
       margin: 20px; 
       font-size: 1.2em;
       text-align: center; /* Center the text */
+    }
+    /* Optional: hover effect for level cards */
+    .level-card {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .level-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
   </style>
 </head>
@@ -25,7 +32,6 @@
     <span id="currentLevel">...</span>
   </div>
   
-
   <div class="level-grid">
     <div class="level-card yellow" data-value="0">Yellow</div>
     <div class="level-card green" data-value="1">Green</div>
@@ -37,13 +43,14 @@
     <div class="level-card diamond" data-value="7">Diamond</div>
   </div>
 
+  <!-- Toastify JS -->
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const baseUrl = "http://localhost:5000"; 
       const studentId = localStorage.getItem('studentId');
       const chapter = localStorage.getItem('chapter');
-      // We don't need 'levelCards' if we are not styling them
-      // const levelCards = document.querySelectorAll('.level-card'); 
       const currentLevelDisplay = document.getElementById('currentLevel');
 
       const levelNames = [
@@ -51,26 +58,31 @@
         "Blue", "Gold", "Platinum", "Diamond"
       ];
 
+      function showToast(msg, bg="#0b163f") {
+        Toastify({
+          text: msg,
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: bg,
+        }).showToast();
+      }
+
       async function checkAndDetermineLevel() {
         try {
-          // Get student data to get currentLevel directly (like in profile.html)
           const studentResponse = await fetch(`${baseUrl}/api/Students/search-id?id=${studentId}`);
           if (!studentResponse.ok) throw new Error('Network response was not ok');
 
           const studentData = await studentResponse.json();
           
-          // Map chapter index to key
           const chapterMap = ["Ch1", "Ch2", "Ch3", "Ch4", "ModernPhysics", "Ch8", "Kirchhoff"];
           const selectedChapterIndex = parseInt(chapter || "0");
           const selectedChapterKey = chapterMap[selectedChapterIndex] || "Ch1";
 
-          // Get level for the selected chapter, fallback to Yellow
           const currentLevelName = (studentData.chapterLevels && studentData.chapterLevels[selectedChapterKey]) || "Yellow";
           
-          // Display the current level
           currentLevelDisplay.textContent = currentLevelName;
           
-          // Also save the level index to localStorage for compatibility
           const levelIndex = levelNames.indexOf(currentLevelName);
           if (levelIndex !== -1) {
             localStorage.setItem("theLevel", levelIndex);
@@ -78,26 +90,23 @@
 
         } catch (error) {
           console.error('Error loading current level:', error);
-          currentLevelDisplay.textContent = "حدث خطأ";
+          currentLevelDisplay.textContent = "...";
+          showToast("حدث خطأ أثناء تحميل المستوى الحالي", "#b00020");
         }
       }
 
-      // ✅ Handle clicking on any level card
-      // We need levelCards for this part.
+      // Handle clicking on any level card
       const levelCards = document.querySelectorAll('.level-card');
       levelCards.forEach(card => {
         card.addEventListener('click', function () {
-          // Allows clicking on any level
           const value = this.getAttribute('data-value');
           localStorage.setItem('level', value);
           window.location.href = "std_questions.html";
         });
       });
     
-      // Call the main function on page load
       checkAndDetermineLevel();
     });
   </script>
 </body>
-
 </html>

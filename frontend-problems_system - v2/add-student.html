@@ -1,103 +1,240 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>إضافة طالب جديد</title>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-      direction: rtl;
+    @import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+
+    * {
+      font-family: "Lalezar", system-ui;
+      font-weight: 600;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: url(img/2.png) no-repeat center center fixed;
+      background-size: cover;
+      direction: rtl;
+      padding-top: 60px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 32px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 650px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+    }
+
     form {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 18px;
     }
+
     label {
-      font-weight: bold;
+      color: #0b163f;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: block;
     }
-    input, select {
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+
+    input,
+    select {
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background-color: #fafafa;
+      color: #0b163f;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      width: 100%;
     }
+
+    input:hover,
+    select:hover {
+      border-color: #c0c0c0;
+      background-color: white;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #0b163f;
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(11, 22, 63, 0.1);
+    }
+
     button {
-      padding: 12px;
-      background-color: #007bff;
+      padding: 14px 24px;
+      background-color: #0b163f;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(11, 22, 63, 0.2);
+      margin-top: 10px;
     }
+
     button:hover {
-      background-color: #0056b3;
+      background-color: #1a2a5b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(11, 22, 63, 0.3);
     }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(11, 22, 63, 0.2);
+    }
+
     .message {
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 4px;
+      margin-top: 25px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      line-height: 1.6;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+
     .success {
       background-color: #d4edda;
       color: #155724;
-      border: 1px solid #c3e6cb;
+      border: 2px solid #c3e6cb;
     }
+
     .error {
       background-color: #f8d7da;
       color: #721c24;
-      border: 1px solid #f5c6cb;
+      border: 2px solid #f5c6cb;
     }
+
     .back-link {
-      margin-bottom: 20px;
-      display: inline-block;
-      color: #007bff;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background-color: #ffffff;
+      color: #0b163f;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      font-weight: 700;
       text-decoration: none;
     }
+
     .back-link:hover {
-      text-decoration: underline;
+      background-color: #122467;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-link:active {
+      transform: translateY(0);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+        padding-top: 70px;
+      }
+
+      h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+      }
+
+      .form-container {
+        padding: 20px;
+      }
+
+      input,
+      select,
+      button {
+        font-size: 15px;
+      }
+
+      .back-link {
+        padding: 10px 16px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
+
 <body>
+  <a href="index.html" class="back-link">رجوع</a>
+
   <h1>إضافة طالب جديد</h1>
-  
-  <a href="index.html" class="back-link">← العودة للصفحة الرئيسية</a>
 
-  <form id="addStudentForm">
-    <div>
-      <label for="studentId">كود الطالب (Student ID):</label>
-      <input type="number" id="studentId" name="studentId" required>
-    </div>
+  <div class="form-container">
+    <form id="addStudentForm">
+      <div>
+        <label for="studentId">كود الطالب (Student ID):</label>
+        <input type="number" id="studentId" name="studentId" required>
+      </div>
 
-    <div>
-      <label for="name">الاسم:</label>
-      <input type="text" id="name" name="name" required>
-    </div>
+      <div>
+        <label for="name">الاسم:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
 
-    <div>
-      <label for="number">رقم الطالب:</label>
-      <input type="text" id="number" name="number" required>
-    </div>
+      <div>
+        <label for="number">رقم الطالب:</label>
+        <input type="text" id="number" name="number" required>
+      </div>
 
-    <div>
-      <label for="parentNumber">رقم ولي الأمر:</label>
-      <input type="text" id="parentNumber" name="parentNumber" required>
-    </div>
+      <div>
+        <label for="parentNumber">رقم ولي الأمر:</label>
+        <input type="text" id="parentNumber" name="parentNumber" required>
+      </div>
 
-    <div>
-      <label for="group">المجموعة:</label>
-      <input type="text" id="group" name="group" required>
-    </div>
+      <div>
+        <label for="group">المجموعة:</label>
+        <input type="text" id="group" name="group" required>
+      </div>
 
-    <button type="submit">إضافة الطالب</button>
-  </form>
+      <button type="submit">إضافة الطالب</button>
+    </form>
 
-  <div id="message"></div>
+    <div id="message"></div>
+  </div>
+
+
 
   <script>
     const baseUrl = 'http://localhost:5000';
@@ -133,34 +270,47 @@
           throw new Error(data.error || 'فشل في إضافة الطالب');
         }
 
-        // Success - show how many problems were assigned
         const problemsCount = data.remainingProblems ? data.remainingProblems.length : 0;
         messageDiv.textContent = `تم إضافة الطالب "${studentData.name}" بنجاح! (الكود: ${studentData.studentId})\nتم تعيين ${problemsCount} مسألة تلقائياً`;
         messageDiv.className = 'message success';
-        
+
         if (problemsCount > 0) {
           console.log(`[Frontend] ${problemsCount} problems automatically assigned to student:`, data.remainingProblems);
         } else {
           console.warn('[Frontend] No problems were assigned! Check if problems.json has any problems.');
         }
-        
-        // Reset form
+
         form.reset();
 
-        // Optional: Redirect after 2 seconds
-        setTimeout(() => {
-          if (confirm('هل تريد العودة للصفحة الرئيسية؟')) {
+        // Toast بديل confirm
+        Toastify({
+          text: "تمت إضافة الطالب! اضغط هنا للعودة للرئيسية",
+          duration: 5000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#0b163f",
+          stopOnFocus: true,
+          onClick: function () {
             window.location.href = 'index.html';
           }
-        }, 2000);
+        }).showToast();
 
       } catch (error) {
         console.error('Error adding student:', error);
         messageDiv.textContent = `حدث خطأ: ${error.message}`;
         messageDiv.className = 'message error';
+
+        Toastify({
+          text: `حدث خطأ: ${error.message}`,
+          duration: 5000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#b00020",
+          stopOnFocus: true
+        }).showToast();
       }
     });
   </script>
 </body>
-</html>
 
+</html>

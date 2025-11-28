@@ -1,194 +1,402 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>حضور اليوم</title>
-<link rel="stylesheet" href="style.css">
-<style>
-  /* تصميم مشابه للـ profile */
-  @import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حضور اليوم</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
 
-  * { font-family: "Lalezar", system-ui; font-weight: 600; margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      font-family: "Lalezar", system-ui;
+      font-weight: 600;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  body {
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-    background: url(img/2.png) no-repeat center center fixed;
-    background-size: cover;
-    color: rgb(0,0,0);
-    direction: rtl;
-    margin-top: 20px;
-  }
+    body {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: url(img/2.png) no-repeat center center fixed;
+      background-size: cover;
+      color: rgb(0, 0, 0);
+      direction: rtl;
+      padding-top: 60px;
+    }
 
-  h2 {
-    padding-top: 2.5%;
-    text-align: center;
-    margin-bottom: 10px;
-    font-size: 28px;
-  }
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 32px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
 
- .form-container {
-  background: rgba(255, 255, 255, 0.85);
+    .form-container {
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 1200px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+    }
 
-  box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-  border-radius: 12px;
-  padding: 20px;
-}
+    .date-picker-section {
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-  .attendance-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-  }
+    .form-container label {
+      color: #0b163f;
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
 
-  .attendance-table th, .attendance-table td {
-    padding: 8px;
-    border: 1px solid #ddd;
-    text-align: center;
-    font-weight: bold;
-  }
+    .form-container input[type="date"] {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      background-color: white;
+      color: #0b163f;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 200px;
+    }
 
-  .attendance-table th {
-    background-color: #0b163f;
-    color: white;
-  }
+    .form-container input[type="date"]:hover {
+      border-color: #0b163f;
+      box-shadow: 0 2px 8px rgba(11, 22, 63, 0.1);
+    }
 
-  input.note-input {
-    width: 90%;
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
+    .form-container input[type="date"]:focus {
+      outline: none;
+      border-color: #0b163f;
+      box-shadow: 0 0 0 3px rgba(11, 22, 63, 0.1);
+    }
 
-  button.save-btn {
-    background-color: #0b163f;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
+    .attendance-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 20px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
 
-  button.save-btn:hover {
-    background-color: #1a2a5b;
-  }
+    .attendance-table th,
+    .attendance-table td {
+      padding: 16px 12px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #f0f0f0;
+    }
 
-  #backButton {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background-color: #0b163f;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    transition: background-color 0.2s;
-  }
+    .attendance-table th {
+      background-color: #0b163f;
+      color: white;
+      font-size: 17px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 18px 12px;
+    }
 
-  #backButton:hover { background-color: #1a2a5b; }
+    .attendance-table tbody tr {
+      transition: all 0.2s ease;
+    }
 
-</style>
+    .attendance-table tbody tr:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.01);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .attendance-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .attendance-table td {
+      font-size: 16px;
+      color: #333;
+    }
+
+    input.note-input {
+      width: 95%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      background-color: #fafafa;
+      color: #0b163f;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    input.note-input:hover {
+      border-color: #c0c0c0;
+      background-color: white;
+    }
+
+    input.note-input:focus {
+      outline: none;
+      border-color: #0b163f;
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(11, 22, 63, 0.1);
+    }
+
+    input.note-input::placeholder {
+      color: #999;
+      font-weight: 500;
+    }
+
+    button.save-btn {
+      background-color: #0b163f;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(11, 22, 63, 0.2);
+    }
+
+    button.save-btn:hover {
+      background-color: #1a2a5b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(11, 22, 63, 0.3);
+    }
+
+    button.save-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(11, 22, 63, 0.2);
+    }
+
+    #backButton {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background-color: #ffffff;
+      color: #0b163f;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      font-weight: 700;
+    }
+
+    #backButton:hover {
+      background-color: #122467;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    #backButton:active {
+      transform: translateY(0);
+    }
+
+    .loading-row td {
+      padding: 30px;
+      font-size: 16px;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+        padding-top: 70px;
+      }
+
+      h2 {
+        font-size: 26px;
+        margin-bottom: 20px;
+      }
+
+      .form-container {
+        padding: 20px;
+        border-radius: 12px;
+      }
+
+      .date-picker-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .form-container input[type="date"] {
+        width: 100%;
+      }
+
+      .attendance-table th,
+      .attendance-table td {
+        padding: 12px 8px;
+        font-size: 14px;
+      }
+
+      .attendance-table th {
+        font-size: 15px;
+        padding: 14px 8px;
+      }
+
+      input.note-input {
+        font-size: 14px;
+        padding: 8px 10px;
+      }
+
+      button.save-btn {
+        padding: 8px 14px;
+        font-size: 14px;
+      }
+
+      #backButton {
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .attendance-table th,
+      .attendance-table td {
+        padding: 10px 6px;
+        font-size: 13px;
+      }
+
+      button.save-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<button id="backButton" onclick="window.location.href='index.html'">رجوع</button>
+  <button id="backButton" onclick="window.location.href='index.html'">رجوع</button>
 
-<h2>حضور اليوم</h2>
+  <h2>حضور اليوم</h2>
 
-<div class="form-container">
-  <label for="attendanceDate">اختر التاريخ:</label>
-  <input type="date" id="attendanceDate">
+  <div class="form-container">
+    <div class="date-picker-section">
+      <label for="attendanceDate">اختر التاريخ:</label>
+      <input type="date" id="attendanceDate">
+    </div>
 
-  <table class="attendance-table" id="attendanceTable">
-    <thead>
-      <tr>
-        <th>الاسم</th>
-        <th>الكود</th>
-        <th>حضور</th>
-        <th>المسايْل</th>
-        <th>حفظ</th>
-      </tr>
-    </thead>
-    <tbody id="attendanceBody">
-      <tr><td colspan="5">جاري التحميل...</td></tr>
-    </tbody>
-  </table>
-</div>
+    <table class="attendance-table" id="attendanceTable">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>الكود</th>
+          <th>حضور</th>
+          <th>المسايْل</th>
+          <th>حفظ</th>
+        </tr>
+      </thead>
+      <tbody id="attendanceBody">
+        <tr class="loading-row">
+          <td colspan="5">جاري التحميل...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<script>
-const API_BASE = 'http://localhost:5000/api';
-const attendanceDateInput = document.getElementById('attendanceDate');
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+    const attendanceDateInput = document.getElementById('attendanceDate');
 
-// تعيين التاريخ الحالي
-attendanceDateInput.value = new Date().toISOString().split('T')[0];
+    // دالة لإظهار Toast
+    function showToast(msg, icon = 'success') {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: icon,
+        title: msg,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+      });
+    }
 
-// تحميل الحضور لليوم
-async function loadAttendance(date) {
-  const res = await fetch(`${API_BASE}/attendance/date/${date}`);
-  const data = await res.json();
-  const tbody = document.getElementById('attendanceBody');
-  tbody.innerHTML = '';
+    // تعيين التاريخ الحالي
+    attendanceDateInput.value = new Date().toISOString().split('T')[0];
 
-  // فصل الحاضرين عن الغائبين
-  const presentStudents = data.filter(s => s.isPresent);
-  const absentStudents = data.filter(s => !s.isPresent);
+    // تحميل الحضور لليوم
+    async function loadAttendance(date) {
+      try {
+        const res = await fetch(`${API_BASE}/attendance/date/${date}`);
+        const data = await res.json();
+        const tbody = document.getElementById('attendanceBody');
+        tbody.innerHTML = '';
 
-  // دالة لإضافة الصفوف
-  const addRows = (students) => {
-    students.forEach(student => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${student.name}</td>
-        <td>${student.studentId}</td>
-        <td>${student.isPresent ? '✅' : '❌'}</td>
-        <td><input type="text" class="note-input" id="note-${student.studentId}" value="${student.notes}"></td>
-        <td><button class="save-btn" onclick="saveNote(${student.studentId}, '${date}')">حفظ</button></td>
-      `;
-      tbody.appendChild(row);
-    });
-  };
+        const presentStudents = data.filter(s => s.isPresent);
+        const absentStudents = data.filter(s => !s.isPresent);
 
-  // عرض الحاضرين أولًا ثم الغائبين
-  addRows(presentStudents);
-  addRows(absentStudents);
-}
+        const addRows = (students) => {
+          students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${student.name}</td>
+              <td>${student.studentId}</td>
+              <td>${student.isPresent ? '✅' : '❌'}</td>
+              <td><input type="text" class="note-input" id="note-${student.studentId}" value="${student.notes || ''}"></td>
+              <td><button class="save-btn" onclick="saveNote(${student.studentId}, '${date}')">حفظ</button></td>
+            `;
+            tbody.appendChild(row);
+          });
+        };
 
+        addRows(presentStudents);
+        addRows(absentStudents);
 
+      } catch (err) {
+        console.error(err);
+        showToast('❌ حدث خطأ أثناء تحميل الحضور', 'error');
+        const tbody = document.getElementById('attendanceBody');
+        tbody.innerHTML = `<tr class="loading-row"><td colspan="5">فشل تحميل البيانات</td></tr>`;
+      }
+    }
 
-async function saveNote(studentId, date) {
-  const note = document.getElementById(`note-${studentId}`).value;
-  try {
-    const res = await fetch(`${API_BASE}/attendance/${studentId}/${encodeURIComponent(date)}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ note })
-    });
-    if (res.ok) alert('✅ تم حفظ المسايْل');
-    else throw new Error();
-  } catch(err) {
-    alert('❌ حدث خطأ أثناء الحفظ');
-    console.error(err);
-  }
-}
+    async function saveNote(studentId, date) {
+      const note = document.getElementById(`note-${studentId}`).value;
+      try {
+        const res = await fetch(`${API_BASE}/attendance/${studentId}/${encodeURIComponent(date)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note })
+        });
+        if (res.ok) showToast('✅ تم حفظ المسايْل', 'success');
+        else throw new Error();
+      } catch (err) {
+        showToast('❌ حدث خطأ أثناء الحفظ', 'error');
+        console.error(err);
+      }
+    }
 
-// تغيير التاريخ يعيد تحميل الحضور
-attendanceDateInput.addEventListener('change', e => loadAttendance(e.target.value));
-
-// تحميل تلقائي عند فتح الصفحة
-loadAttendance(attendanceDateInput.value);
-</script>
+    attendanceDateInput.addEventListener('change', e => loadAttendance(e.target.value));
+    loadAttendance(attendanceDateInput.value);
+  </script>
 
 </body>
 </html>

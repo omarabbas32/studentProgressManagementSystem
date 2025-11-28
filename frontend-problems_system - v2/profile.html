@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="profile.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <title>profile</title>
 </head>
 <body>
@@ -103,11 +104,24 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
 const baseUrl = 'http://localhost:5000';
 const grade3BaseUrl = 'http://localhost:7000';
 const studentId = localStorage.getItem('studentId') || new URLSearchParams(window.location.search).get("id");
 const thisweekchapter = localStorage.getItem('thisweekchapter');
+
+function showToast(msg, type="success") {
+  const bgColor = type === "success" ? "#28a745" : "#dc3545";
+  Toastify({
+    text: msg,
+    duration: 3000,
+    gravity: "top",
+    position: "center",
+    backgroundColor: bgColor,
+    stopOnFocus: true,
+  }).showToast();
+}
 
 function getLevelName(levelName) {
   const levels = ["Yellow", "Green", "Red", "Black", "Blue", "Gold", "Platinum", "Diamond"];
@@ -154,7 +168,7 @@ async function loadStudentData() {
     const studentData = await studentRes.json();
     const attendanceCount = await attendanceRes.json();
     const streakData = await streakRes.json();
-    const paymentData = paymentRes.ok ? await paymentRes.json() : null;
+    const paymentData = paymentRes?.ok ? await paymentRes.json() : null;
     const lastClassesData = lastClassesRes?.ok ? await lastClassesRes.json() : [];
 
     document.getElementById("studentName").value = studentData.name;
@@ -164,25 +178,18 @@ async function loadStudentData() {
     document.getElementById("studentGroup").value = studentData.group;
     document.getElementById("attendanceCount").textContent = attendanceCount;
 
-    // Map chapter index to key
     const chapterMap = ["Ch1", "Ch2", "Ch3", "Ch4", "ModernPhysics", "Ch8", "Kirchhoff"];
     const chapterNames = ["الباب الأول", "الباب الثاني", "الباب الثالث", "الباب الرابع", "الحديثة", "الباب الثامن", "كيرشوف"];
     const selectedChapterIndex = parseInt(thisweekchapter || "0");
-    const selectedChapterKey = chapterMap[selectedChapterIndex] || "Ch1";
     
-    // Get level for the selected chapter, fallback to Yellow
-    const levelForChapter = (studentData.chapterLevels && studentData.chapterLevels[selectedChapterKey]) || "Yellow";
-
-    // Display all chapter levels
     const allChapterLevelsDiv = document.getElementById("allChapterLevels");
     allChapterLevelsDiv.innerHTML = "";
-    
+
     if (studentData.chapterLevels && Object.keys(studentData.chapterLevels).length > 0) {
       chapterMap.forEach((chapterKey, index) => {
         const level = studentData.chapterLevels[chapterKey] || "Yellow";
         const chapterName = chapterNames[index];
         
-        // Color coding based on level
         const levelColors = {
           "Yellow": "#FFD700",
           "Green": "#28a745",
@@ -210,7 +217,6 @@ async function loadStudentData() {
       allChapterLevelsDiv.innerHTML = '<div style="text-align:center; grid-column: 1/-1;">لا توجد بيانات مستويات</div>';
     }
 
-    /* Attendance streak — TABLE VERSION */
     const attendanceDays = streakData.attendanceStreak || [];
     const streakBody = document.getElementById("absenceStreakTableBody");
     streakBody.innerHTML = "";
@@ -218,21 +224,17 @@ async function loadStudentData() {
     if (attendanceDays.length === 0) {
       streakBody.innerHTML = `<tr><td colspan="2">لا يوجد بيانات</td></tr>`;
     } else {
-     attendanceDays.forEach((item, index) => {
-    const status = item.status.includes("حضور") ? "present" : "absent";
-
-    const row = `
-      <tr>
-        <td>${item.date}</td>  <!-- عرض التاريخ بدل اليوم 1/2 -->
-        <td class="${status}">${item.status}</td>
-      </tr>
-    `;
-    streakBody.innerHTML += row;
-});
-
+      attendanceDays.forEach((item) => {
+        const status = item.status.includes("حضور") ? "present" : "absent";
+        streakBody.innerHTML += `
+          <tr>
+            <td>${item.date}</td>
+            <td class="${status}">${item.status}</td>
+          </tr>
+        `;
+      });
     }
 
-    /* Payment UI */
     if (paymentData) {
       document.getElementById("paymentInfo").innerHTML = `
         <div class="payment-line">الشهر الحالي: ${paymentData.currentMonth}</div>
@@ -253,7 +255,6 @@ async function loadStudentData() {
       `;
     }
 
-    /* Last Classes with translated day and type */
     const tbody = document.getElementById("lastClassesBody");
     tbody.innerHTML = "";
 
@@ -262,7 +263,7 @@ async function loadStudentData() {
     } else {
       lastClassesData.forEach(item => {
         const color = item.status === "حضور" ? "green" : "red";
-        const row = `
+        tbody.innerHTML += `
           <tr>
             <td>${item.no}</td>
             <td style="color:${color}; font-weight:bold">${item.status}</td>
@@ -272,23 +273,19 @@ async function loadStudentData() {
             <td>${item.mark}${item.isAutoDetected ? " (تلقائي)" : ""}</td>
           </tr>
         `;
-        tbody.innerHTML += row;
       });
     }
 
   } catch (err) {
-    alert("خطأ في تحميل البيانات");
+    showToast("خطأ في تحميل البيانات", "error");
   }
 }
 
 window.addEventListener("DOMContentLoaded", loadStudentData);
 document.getElementById('backButton').addEventListener('click', () => {
-    // غير الرابط ده للصفحة اللي عايز ترجع لها
     window.location.href = 'index.html';
 });
-
 </script>
-
 
 </body>
 </html>
