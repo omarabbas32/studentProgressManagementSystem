@@ -45,7 +45,6 @@ h1 {
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  user-select: none;
 }
 
 .level-card:hover {
@@ -93,9 +92,10 @@ h1 {
 }
 
 .current-level-container {
+  font-size: 24px;
   margin-top: 10px;
   background-color: #0b163f;
   color: #ffffff;
-  padding: 2px 10px;
+  padding: 12px;
   border-radius: 5px;
 }

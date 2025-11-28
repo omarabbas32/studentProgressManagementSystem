@@ -1,236 +1,223 @@
 @import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
-    * {
-      font-family: "Lalezar", system-ui;
-      font-weight: 600;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      scroll-behavior: smooth;
-    }
 
-    body {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 10px;
-      background: url(img/2.png) no-repeat center center fixed;
-      background-size: cover;
-      overflow-x: hidden;
-      color: white;
-      direction: rtl;
-      margin-top: 20px;
-    }
+* {
+  font-family: "Lalezar", system-ui;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
 
-    h2 {
-      padding-top: 2.5%;
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 28px;
-    }
+body {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background: url(img/2.png) no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+  direction: rtl;
+  margin-top: 20px;
+}
 
-    .form-container {
-      background-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-      border-radius: 10px;
-      padding: 15px;
-      width: 100%;
-      max-width: 600px;
-      margin: 5% 0;
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
+h2 {
+  padding-top: 2.5%;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 28px;
+}
 
-    .form-container label {
-      color: #0b163f;
-      margin: 6px 0 3px;
-      font-size: 18px;
-    }
+/* Main Container */
+.form-container {
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 20px;
+  width: 100%;
+  max-width: 600px;
+  margin: 5% 0;
+  display: flex;
+  flex-direction: column;
+}
 
-    .form-container input,
-    .form-container button {
-      color: #0b163f;
-      margin: 4px 0;
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-    }
+/* Labels */
+.form-container label {
+  color: #0b163f;
+  margin: 6px 0 3px;
+  font-size: 18px;
+}
 
-    .form-container input {
-      background-color: #f0f0f0;
-    }
+/* Inputs */
+.form-container input {
+  margin: 4px 0;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+  background-color: #f0f0f0;
+  color: #0b163f;
+}
 
-    .form-container button {
-      background-color: #0b163f;
-      color: white;
-      cursor: pointer;
-      padding: 10px;
-      font-size: 18px;
-      font-weight: 590;
-    }
+/* Buttons */
+.form-container button {
+  background-color: #0b163f;
+  color: white;
+  cursor: pointer;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 15px;
+}
 
-    .form-container button:hover {
-      background-color: #ffffff;
-      color: #0b163f;
-    }
+.form-container button:hover {
+  background-color: #ffffff;
+  color: #0b163f;
+}
 
-    .attendance-box {
-      background-color: #0b163f;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-    }
+/* Attendance Box */
+.attendance-box {
+  background-color: #0b163f;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+}
 
-    .attendance-box p {
-      margin: 0;
-      color: white;
-      font-size: 16px;
-    }
+.attendance-box p {
+  margin: 0;
+  color: white;
+  font-size: 16px;
+}
 
-    #attendanceCircle {
-      width: 100px;
-      height: 100px;
-      margin: 10px auto;
-      position: relative;
-    }
+/* Payment Box */
+.payment-box {
+  background-color: #0b163f;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  text-align: right;
+}
 
+.payment-line {
+  margin: 8px 0;
+  background: white;
+  padding: 8px;
+  border-radius: 6px;
+  color: #0b163f;
+}
 
-    @media (max-width: 768px) {
-      body {
-        padding: 18px;
-        margin-top: 15px;
-      }
+.status-paid {
+  color: green;
+  font-weight: bold;
+}
 
-      h2 {
+.status-unpaid {
+  color: red;
+  font-weight: bold;
+}
 
-        font-size: 18px;
-      }
+/* Last Classes Table */
+.last-classes-box {
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
 
-      .form-container {
-        max-width: 95%;
-        padding: 12px;
-      }
+.last-classes-box table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #0b163f;
+}
 
-      .form-container label {
-        font-size: 16px;
-      }
+.last-classes-box th,
+.last-classes-box td {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
 
-      .form-container input,
-      .form-container button {
-        font-size: 14px;
-        padding: 8px;
-      }
+.last-classes-box th {
+  background-color: #0b163f;
+  color: white;
+}
 
-      .attendance-box p {
-        font-size: 14px;
-      }
+/* Absence Streak */
+.absence-streak-box {
+  width: 100%;
+  font-size: 18px;
+  margin-top: 20px;
+  padding: 10px;
+  border: 2px solid #ffffff;
+  border-radius: 8px;
+  background-color: #ffeaea;
+  text-align: center;
+  color: #0b163f;
+}
 
-      .view-grade-btn {
-        font-size: 16px;
-        padding: 8px;
-        margin-top: 10px;
-      }
-    }
+.streak-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-    @media (max-width: 430px) {
-      body {
-        padding: 5px;
-        margin-top: 10px;
-      }
+.streak-table th {
+  background: #0b163f;
+  color: white;
+  padding: 8px;
+  text-align: center;
+}
 
-      h2 {
-        font-size: 20px;
-      }
+.streak-table td {
+  text-align: center;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-weight: bold;
+}
 
-      .form-container {
-        padding: 10px;
-        max-width: 98%;
-      }
+.present {
+  color: green;
+}
 
-      .form-container label {
-        font-size: 14px;
-      }
-
-      .form-container input,
-      .form-container button {
-        font-size: 13px;
-        padding: 7px;
-      }
-
-      .attendance-box p {
-        font-size: 13px;
-      }
-
-      .view-grade-btn {
-        font-size: 14px;
-        padding: 7px;
-        margin-top: 8px;
-      }.streak-container {
-        margin: 20px 0;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-      }
-      
-      #streakBars {
-        display: flex;
-        gap: 10px;
-        margin: 15px 0;
-      }
-      
-      .streak-bar {
-        height: 30px;
-        flex: 1;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-      }
-      
-      .present {
-        background-color: #28a745;
-      }
-      
-      .absent {
-        background-color: #dc3545;
-      }
-      
-      .streak-stats {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 10px;
-      }
+.absent {
+  color: red;
+}
 
 
-      
-    }
+/* Mobile */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 22px;
+  }
+  .form-container {
+    max-width: 95%;
+    padding: 12px;
+  }
+  
+}
+#backButton {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background-color: #0b163f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: background-color 0.2s;
+}
 
-
-    .absence-streak-box {
-      width: 100%;
-      font-size:18px;
-      margin-top: 20px;
-      padding: 10px;
-      border: 2px solid #ffffff;
-      border-radius: 8px;
-      background-color: #ffeaea;
-      text-align: center;
-     
-    }
-    
-    .absence-streak-box p {
-      margin: 0;
-      color: #0b163f;
-    }
+#backButton:hover {
+  background-color: #1a2a5b;
+}

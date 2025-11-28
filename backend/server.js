@@ -23,6 +23,7 @@ app.use('/api/Download', require('./routes/download'));
 app.use('/api/UpdatingLevel', require('./routes/updatingLevel'));
 app.use('/api/Warning', require('./routes/warning'));
 
+
 // New problems route for centralized problem management
 app.use('/api/problems', require('./routes/problems-new'));
 
@@ -57,9 +58,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
-    console.log(`API available at http://localhost:${PORT}/api`);
+    console.log(`API available at http://0.0.0.0:${PORT}/api`);
 });
 
 module.exports = app;

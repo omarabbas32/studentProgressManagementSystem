@@ -2,6 +2,13 @@
   "1": {
     "studentId": 1,
     "chapterLevels": {
+      "0": 0,
+      "NaN": 0
+    }
+  },
+  "12": {
+    "studentId": 12,
+    "chapterLevels": {
       "0": "0"
     }
   }

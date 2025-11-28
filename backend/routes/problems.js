@@ -36,7 +36,7 @@ router.post('/assign', (req, res) => {
                 numberOfProblem: problem.numberOfProblem,
                 level: problem.level,
                 chapter: problem.chapter,
-                assignedDate: new Date().toISOString(),
+                assignedDate: new Date().toISOString(), 
                 isCompleted: false
             };
             student.assignedProblems.push(newProblem);
@@ -67,8 +67,8 @@ router.delete('/:studentId/:chapter/:level', (req, res) => {
             .filter(p => p.chapter === chapter && p.level === level);
 
         if (problemsToRemove.length === 0) {
-            return res.status(404).json({ 
-                error: `No problems found for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+            return res.status(404).json({
+                error: `No problems found for student ${studentId} in Chapter ${chapter} and Level ${level}`
             });
         }
 
@@ -77,8 +77,8 @@ router.delete('/:studentId/:chapter/:level', (req, res) => {
         );
 
         dataService.saveStudents(students);
-        res.json({ 
-            message: `Removed ${problemsToRemove.length} problems for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+        res.json({
+            message: `Removed ${problemsToRemove.length} problems for student ${studentId} in Chapter ${chapter} and Level ${level}`
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -103,8 +103,8 @@ router.put('/:studentId/:chapter/:level/complete', (req, res) => {
             .filter(p => p.chapter === chapter && p.level === level && !p.isCompleted);
 
         if (problems.length === 0) {
-            return res.status(404).json({ 
-                error: `No uncompleted problems found for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+            return res.status(404).json({
+                error: `No uncompleted problems found for student ${studentId} in Chapter ${chapter} and Level ${level}`
             });
         }
 
@@ -114,8 +114,8 @@ router.put('/:studentId/:chapter/:level/complete', (req, res) => {
         });
 
         dataService.saveStudents(students);
-        res.json({ 
-            message: `Marked ${problems.length} problems as completed for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+        res.json({
+            message: `Marked ${problems.length} problems as completed for student ${studentId} in Chapter ${chapter} and Level ${level}`
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -133,7 +133,7 @@ router.get('/all/:chapter/:level', (req, res) => {
         // Try new centralized problems system first
         const problems = dataService.loadProblems();
         console.log(`[DEBUG] Loaded ${problems.length} problems from centralized file`);
-        
+
         if (problems && problems.length > 0) {
             // Filter by chapter and level from centralized problems file
             const filteredProblems = problems.filter(p => {
@@ -236,41 +236,92 @@ router.get('/:studentId/:chapter/:level', (req, res) => {
 router.delete('/remove', (req, res) => {
     try {
         const request = req.body;
+        console.log('[Backend] DELETE /remove request received:', request);
 
         if (!request.book) {
+            console.log('[Backend] Error: Book is required');
             return res.status(400).json({ error: 'Book is required' });
         }
 
+        // Step 1: Remove from centralized problems.json
+        const problems = dataService.loadProblems();
+        console.log(`[Backend] Loaded ${problems.length} problems from centralized file`);
+
+        const originalProblemsCount = problems.length;
+        const filteredProblems = problems.filter(p => {
+            const matches = p.book === request.book &&
+                p.page === request.page &&
+                p.numberOfProblem === request.numberOfProblem &&
+                p.level === request.level &&
+                p.chapter === request.chapter;
+
+            if (matches) {
+                console.log(`[Backend] Found matching problem in centralized file:`, p);
+            }
+
+            return !matches;
+        });
+
+        const removedFromCentralized = originalProblemsCount > filteredProblems.length;
+
+        if (removedFromCentralized) {
+            dataService.saveProblems(filteredProblems);
+            console.log(`[Backend] Removed problem from centralized file. ${filteredProblems.length} problems remaining.`);
+        } else {
+            console.log('[Backend] Problem not found in centralized file');
+        }
+
+        // Step 2: Remove from all students' assignedProblems
         const students = dataService.loadStudents();
-        let modifiedCount = 0;
+        console.log(`[Backend] Loaded ${students.length} students`);
+        let modifiedStudentCount = 0;
 
         students.forEach(student => {
             const originalCount = (student.assignedProblems || []).length;
 
-            student.assignedProblems = (student.assignedProblems || []).filter(p =>
-                !(p.book === request.book &&
-                  p.page === request.page &&
-                  p.numberOfProblem === request.numberOfProblem &&
-                  p.level === request.level &&
-                  p.chapter === request.chapter)
-            );
+            student.assignedProblems = (student.assignedProblems || []).filter(p => {
+                const matches = p.book === request.book &&
+                    p.page === request.page &&
+                    p.numberOfProblem === request.numberOfProblem &&
+                    p.level === request.level &&
+                    p.chapter === request.chapter;
+
+                if (matches) {
+                    console.log(`[Backend] Found matching problem in student ${student.studentId}:`, p);
+                }
+
+                return !matches;
+            });
 
             if (student.assignedProblems.length < originalCount) {
-                modifiedCount++;
+                modifiedStudentCount++;
+                console.log(`[Backend] Removed problem from student ${student.studentId}`);
             }
         });
 
-        dataService.saveStudents(students);
+        if (modifiedStudentCount > 0) {
+            dataService.saveStudents(students);
+            console.log(`[Backend] Modified ${modifiedStudentCount} students`);
+        }
 
-        if (modifiedCount === 0) {
+        // Return success if removed from either location
+        if (!removedFromCentralized && modifiedStudentCount === 0) {
+            console.log('[Backend] No problems found matching the criteria in either location');
             return res.status(404).json({ message: 'No problems found matching the criteria' });
         }
 
+        const responseMsg = removedFromCentralized
+            ? `Problem removed from centralized storage${modifiedStudentCount > 0 ? ` and ${modifiedStudentCount} student(s)` : ''}`
+            : `Problem removed from ${modifiedStudentCount} student(s)`;
+
+        console.log(`[Backend] Success: ${responseMsg}`);
         res.json({
-            message: `Problem removed from ${modifiedCount} student(s)`,
-            modifiedCount
+            message: responseMsg,
+            removedFromCentralized,
+            modifiedStudentCount
         });
     } catch (error) {
+        console.error('[Backend] Error in DELETE /remove:', error);
         res.status(500).json({ error: 'Failed to save changes', details: error.message });
     }
 });

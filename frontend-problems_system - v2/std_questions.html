@@ -280,41 +280,47 @@
       }
   
       document.getElementById("finishLevelBtn").addEventListener("click", async function () {
-  if (!confirm("هل أنت متأكد أنك تريد إنهاء هذا المستوى؟ لا يمكن التراجع عن هذا الإجراء.")) return;
-  //const nextLevel = level + 1; 
-  try {
-    // First API call - Delete the current level
-    const deleteResponse = await fetch(`${baseUrl}/api/Students/problems/${studentId}/${chapter}/${level}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    
-   // if (!deleteResponse.ok) throw new Error('فشل في إنهاء المستوى الحالي');
- 
-  
-    // Second API call - Save the new level
-    const saveResponse = await fetch(`${baseUrl}/api/UpdatingLevel/save-level`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        studentId: parseInt(studentId),
-        chapterId: parseInt(chapter),
-        newLevel: level
-      })
-    });
-    
-    if (!saveResponse.ok) throw new Error('فشل في حفظ المستوى الجديد');
-    
-    // Success message
-    alert("تم إنهاء المستوى وحفظ المستوى الجديد بنجاح!");
-    window.location.reload();
-  } catch (error) {
-    console.error('Error:', error);
-    alert("حدث خطأ: " + error.message);
-  }
-});
+        if (!confirm("هل أنت متأكد أنك تريد إنهاء هذا المستوى؟ سيتم حل جميع المسائل في هذا المستوى تلقائياً.")) return;
+        
+        try {
+          // Call the finish level endpoint to mark all problems as solved
+          const response = await fetch(`${baseUrl}/api/Students/${studentId}/finish-level`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              chapter: parseInt(chapter),
+              level: parseInt(level)
+            })
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'فشل في إنهاء المستوى');
+          }
+          
+          const data = await response.json();
+          
+          // Success message
+          alert(data.message || "تم إنهاء المستوى بنجاح!");
+          
+          // Refresh the questions list to show all problems as solved
+          fetchQuestions();
+          
+          // If level was completed and student moved to next level, show message
+          if (data.student && data.student.currentLevel) {
+            const levelNames = ["Yellow", "Green", "Red", "Black", "Blue", "Gold", "Platinum", "Diamond"];
+            const newLevelIndex = levelNames.indexOf(data.student.currentLevel);
+            if (newLevelIndex > parseInt(level)) {
+              alert(`مبروك! تم الانتقال تلقائياً إلى المستوى التالي: ${data.student.currentLevel} 🎉`);
+            }
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert("حدث خطأ: " + error.message);
+        }
+      });
      
   
       fetchQuestions();

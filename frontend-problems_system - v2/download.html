@@ -43,6 +43,7 @@
 
       <div class="download-buttons">
         <button onclick="downloadAllCSV()">تحميل بيانات المستوي</button>
+        <button onclick="downloadCompletedCSV()">تحميل الطلاب الذين أنهوا المستوى</button>
         <button onclick="downloadAbsentCSV()">تحميل غياب الإسبوع</button>
       </div>
     </div>
@@ -52,6 +53,9 @@
           fetch(url)
             .then(response => {
               if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("لا يوجد طلاب في هذا التقرير");
+                }
                 throw new Error("Network response was not ok");
               }
               return response.blob();
@@ -75,6 +79,13 @@
           const level = document.getElementById("level").value;
           const apiUrl = `${baseAPi}/api/Download/empty-problems-excel/${chapter}/${level}`;
           downloadFile(apiUrl, `problems_ch${chapter}_lvl${level}.xlsx`);
+        }
+
+        function downloadCompletedCSV() {
+          const chapter = document.getElementById("chapter").value;
+          const level = document.getElementById("level").value;
+          const apiUrl = `${baseAPi}/api/Download/completed-level-excel/${chapter}/${level}`;
+          downloadFile(apiUrl, `completed_ch${chapter}_lvl${level}.xlsx`);
         }
       
         function downloadAbsentCSV() {

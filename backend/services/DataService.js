@@ -40,8 +40,8 @@ class DataService {
             }
             const data = fs.readFileSync(this.studentsFilePath, 'utf8');
             const parsed = JSON.parse(data);
-            // Convert PascalCase to camelCase for compatibility
-            return this._convertToCamelCase(parsed);
+            // Return parsed data directly - do NOT convert to camelCase as it corrupts chapter keys (Ch1 -> ch1)
+            return parsed;
         } catch (error) {
             console.error('Error loading students:', error);
             return [];

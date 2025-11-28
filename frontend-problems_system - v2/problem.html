@@ -31,7 +31,7 @@
         </select>
 
         <label for="level">المستوي</label>
-        <select id="level" required>
+        <select id="level" >
           <option value="0">Yellow</option>
           <option value="1">Green</option>
           <option value="2">Red</option>
@@ -70,7 +70,23 @@
       const problemsTable = document.querySelector("#problemsTable tbody");
 
       // Load problems when page loads
-      document.addEventListener("DOMContentLoaded", loadProblems);
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedChapter = localStorage.getItem("selectedChapter");
+        const savedLevel = localStorage.getItem("selectedLevel");
+        if (savedChapter !== null) document.getElementById("chapter").value = savedChapter;
+        if (savedLevel !== null) document.getElementById("level").value = savedLevel;
+        loadProblems();
+      });
+      
+      // Reload problems when chapter or level changes
+      document.getElementById("chapter").addEventListener("change", () => {
+        localStorage.setItem("selectedChapter", document.getElementById("chapter").value);
+        loadProblems();
+      });
+      document.getElementById("level").addEventListener("change", () => {
+        localStorage.setItem("selectedLevel", document.getElementById("level").value);
+        loadProblems();
+      });
 
       function loadProblems() {
         const chapter = parseInt(document.getElementById("chapter").value) || 0;
@@ -114,7 +130,13 @@
                 <td>${problem.numberOfProblem || '--'}</td>
                 <td>${getChapterName(problem.chapter)}</td>
                 <td>${getLevelName(problem.level)}</td>
-                <td><button class="delete-btn" data-id="${problem.problemId}">Delete</button></td>
+                <td><button class="delete-btn" 
+                    data-id="${problem.problemId}"
+                    data-book="${problem.book}"
+                    data-page="${problem.page}"
+                    data-number="${problem.numberOfProblem}"
+                    data-chapter="${problem.chapter}"
+                    data-level="${problem.level}">Delete</button></td>
               `;
               problemsTable.appendChild(row);
             });
@@ -136,13 +158,14 @@
       function deleteProblem(problemId) {
   if (!confirm("هل انت متأكد من مسح المسألة؟")) return;
 
-  const row = document.querySelector(`button[data-id="${problemId}"]`).closest("tr");
+  const button = document.querySelector(`button[data-id="${problemId}"]`);
 
-  const book = row.cells[0].textContent.trim();
-  const page = parseInt(row.cells[1].textContent.trim());
-  const numberOfProblem = parseInt(row.cells[2].textContent.trim());
-  const chapter = parseInt(document.getElementById("chapter").value); // use form select value
-  const level = parseInt(document.getElementById("level").value);     // use form select value
+  // Get data from button attributes instead of table cells to avoid parsing issues
+  const book = button.getAttribute('data-book');
+  const page = parseInt(button.getAttribute('data-page'));
+  const numberOfProblem = parseInt(button.getAttribute('data-number'));
+  const chapter = parseInt(button.getAttribute('data-chapter'));
+  const level = parseInt(button.getAttribute('data-level'));
 
   const data = {
     book,
@@ -152,6 +175,8 @@
     level
   };
 
+  console.log("[Frontend] Deleting problem:", data);
+
   fetch("http://localhost:5000/api/Problem/remove", {
     method: "DELETE",
     headers: {
@@ -160,14 +185,27 @@
     body: JSON.stringify(data)
   })
     .then((response) => {
-      if (!response.ok) throw new Error("لم يتم مسح المسألة");
+      console.log("[Frontend] Delete response status:", response.status);
+      if (!response.ok) {
+        return response.json().then(err => {
+          throw new Error(err.message || err.error || "لم يتم مسح المسألة");
+        }).catch(jsonError => {
+          // If response is not JSON, throw generic error
+          if (jsonError.message) throw jsonError;
+          throw new Error(`HTTP ${response.status}: لم يتم مسح المسألة`);
+        });
+      }
+      return response.json();
+    })
+    .then((result) => {
+      console.log("[Frontend] Delete successful:", result);
       loadProblems(); // Refresh the table
-      messageDiv.textContent = "تم مسح المسألة من جميع الطلاب";
+      messageDiv.textContent = result.message || "تم مسح المسألة من جميع الطلاب";
       messageDiv.style.color = "green";
     })
     .catch((error) => {
-      console.error("لم يتم مسح المسألة", error);
-      messageDiv.textContent = "لم يتم مسح المسألة";
+      console.error("[Frontend] Error deleting problem:", error);
+      messageDiv.textContent = "لم يتم مسح المسألة: " + error.message;
       messageDiv.style.color = "red";
     });
 }
@@ -239,7 +277,7 @@
           loadProblems();
           messageDiv.textContent = "تم إضافة المسألة بنجاح";
           messageDiv.style.color = "green";
-          form.reset();
+         // form.reset();
         } catch (error) {
           console.error("Error assigning problem:", error);
           messageDiv.textContent = "حدث خطأ في إضافة المسألة: " + error.message;

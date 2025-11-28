@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const dataService = require('../services/DataService');
 const { ChapterEnum, LevelEnum } = require('../models/Enums');
+const levelProgressService = require('../services/LevelProgressService');
 
 
 router.get('/', (req, res) => {
@@ -13,23 +14,113 @@ router.get('/', (req, res) => {
     }
 });
 
+// GET students by group
+router.get('/group/:groupName', (req, res) => {
+    try {
+        const groupName = req.params.groupName;
+        const students = dataService.loadStudents();
+        // Case-insensitive comparison for group name
+        const filtered = students.filter(s => s.group && s.group.toLowerCase() === groupName.toLowerCase());
+        res.json(filtered);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+
+router.post('/sync-student', (req, res) => {
+    try {
+        const students = dataService.loadStudents();
+        const StudentModel = require('../models/Student');
+
+        const incoming = req.body;
+
+        console.log("Incoming body:", incoming);
+
+        // Find existing student to preserve currentChapter/currentLevel if not provided
+        const existingStudent = students.find(s => s.studentId === incoming.Id);
+
+        // Correct mapping from .NET → Node.js model
+        const mappedStudent = new StudentModel({
+            studentId: incoming.Id,         // Capital I
+            name: incoming.Name,            // Capital N
+            number: incoming.Phone1,        // Capital P
+            parentNumber: incoming.Phone2,  // Capital P
+            group: incoming.SumsGroup,          // Capital G
+
+            // Keep old or initialize new
+            assignedProblems: incoming.assignedProblems || [],
+            attendances: incoming.attendances || [],
+            remainingProblems: incoming.remainingProblems || [],
+            solvedProblems: incoming.solvedProblems || [],
+            completedLevels: incoming.completedLevels || [],
+
+            chapterLevels: incoming.chapterLevels || (existingStudent?.chapterLevels || {})
+        });
+
+
+        const index = students.findIndex(s => s.studentId === mappedStudent.studentId);
+
+        // Update progress BEFORE saving
+        // This automatically checks if student should progress to next level/chapter
+        levelProgressService.updateProgress(mappedStudent);
+
+        if (index !== -1) {
+            students[index] = {
+                ...students[index],
+                ...mappedStudent
+            };
+        } else {
+            students.push(mappedStudent);
+        }
+
+        dataService.saveStudents(students);
+
+        res.json({
+            message: "Student synced successfully",
+            student: {
+                ...mappedStudent,
+                chapterLevels: mappedStudent.chapterLevels
+            }
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+
+
+
+
+
+
+
+
 // GET student by ID
 router.get('/search-id', (req, res) => {
     try {
         const id = parseInt(req.query.id);
         const students = dataService.loadStudents();
         const student = students.find(s => s.studentId === id);
-        
+
         if (!student) {
             return res.status(404).json({ error: 'Student not found' });
         }
+
+        // Normalize student data
+        levelProgressService.normalizeStudentData(student);
 
         res.json({
             studentId: student.studentId,
             name: student.name,
             number: student.number,
             parentNumber: student.parentNumber,
-            group: student.group
+            group: student.group,
+            chapterLevels: student.chapterLevels || {}
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -125,12 +216,12 @@ router.post('/', (req, res) => {
         // Load all problems and assign their IDs to this student's remainingProblems
         const problems = dataService.loadProblems();
         console.log(`[DEBUG] Creating student ${student.studentId}: Found ${problems.length} problems to assign`);
-        
+
         // Initialize arrays
         student.remainingProblems = [];
         student.solvedProblems = [];
         student.completedLevels = [];
-        
+
         // Assign ALL existing problems to the new student's remainingProblems
         problems.forEach(p => {
             const problemId = p.id || p.problemId;
@@ -139,7 +230,7 @@ router.post('/', (req, res) => {
                 console.log(`[DEBUG] Adding problem ID ${problemId} to student's remainingProblems`);
             }
         });
-        
+
         console.log(`[DEBUG] Student ${student.studentId} initialized with ${student.remainingProblems.length} remaining problems`);
         console.log(`[DEBUG] Problem IDs assigned:`, student.remainingProblems);
 
@@ -167,7 +258,7 @@ router.post('/', (req, res) => {
 
         students.push(student);
         dataService.saveStudents(students);
-        
+
         console.log(`[DEBUG] Student ${student.studentId} created successfully. Remaining problems: ${student.remainingProblems.length}`);
         console.log(`[DEBUG] Student data:`, JSON.stringify({
             studentId: student.studentId,
@@ -176,7 +267,7 @@ router.post('/', (req, res) => {
             solvedProblems: student.solvedProblems,
             completedLevels: student.completedLevels
         }, null, 2));
-        
+
         res.status(201).json(student);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -325,8 +416,8 @@ router.delete('/problems/:studentId/:chapter/:level', (req, res) => {
             .filter(p => p.chapter === chapter && p.level === level);
 
         if (problemsToRemove.length === 0) {
-            return res.status(404).json({ 
-                error: `No problems found for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+            return res.status(404).json({
+                error: `No problems found for student ${studentId} in Chapter ${chapter} and Level ${level}`
             });
         }
 
@@ -335,8 +426,8 @@ router.delete('/problems/:studentId/:chapter/:level', (req, res) => {
         );
 
         dataService.saveStudents(students);
-        res.json({ 
-            message: `Removed ${problemsToRemove.length} problems for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+        res.json({
+            message: `Removed ${problemsToRemove.length} problems for student ${studentId} in Chapter ${chapter} and Level ${level}`
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -361,8 +452,8 @@ router.put('/problems/:studentId/:chapter/:level/complete', (req, res) => {
             .filter(p => p.chapter === chapter && p.level === level && !p.isCompleted);
 
         if (problems.length === 0) {
-            return res.status(404).json({ 
-                error: `No uncompleted problems found for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+            return res.status(404).json({
+                error: `No uncompleted problems found for student ${studentId} in Chapter ${chapter} and Level ${level}`
             });
         }
 
@@ -372,8 +463,8 @@ router.put('/problems/:studentId/:chapter/:level/complete', (req, res) => {
         });
 
         dataService.saveStudents(students);
-        res.json({ 
-            message: `Marked ${problems.length} problems as completed for student ${studentId} in Chapter ${chapter} and Level ${level}` 
+        res.json({
+            message: `Marked ${problems.length} problems as completed for student ${studentId} in Chapter ${chapter} and Level ${level}`
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -465,6 +556,7 @@ router.post('/:studentId/attendance', (req, res) => {
         const weekStart = new Date(today);
         weekStart.setDate(today.getDate() - diff);
         weekStart.setHours(0, 0, 0, 0);
+
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
 
@@ -481,28 +573,32 @@ router.post('/:studentId/attendance', (req, res) => {
 
         const attendance = req.body;
 
-        if (existingAttendanceIndex !== -1) {
-            // Update existing attendance
-            student.attendances[existingAttendanceIndex].isPresent = attendance.isPresent;
-            student.attendances[existingAttendanceIndex].notes = attendance.notes || '';
-            res.json(student.attendances[existingAttendanceIndex]);
-        } else {
-            // Create new attendance record
-            attendance.studentId = studentId;
-            attendance.attendanceId = student.attendances.length > 0
+        // Always set/update the actual attendance date
+        attendance.date = attendance.date || new Date().toISOString();
+
+        // Create new attendance record - ALWAYS create new, allowing multiple per week
+        attendance.studentId = studentId;
+        attendance.attendanceId =
+            student.attendances.length > 0
                 ? Math.max(...student.attendances.map(a => a.attendanceId || 0)) + 1
                 : 1;
-            attendance.weekStartDate = weekStart.toISOString();
-            attendance.weekEndDate = weekEnd.toISOString();
-            student.attendances.push(attendance);
-            res.json(attendance);
-        }
+
+        attendance.weekStartDate = weekStart.toISOString();
+        attendance.weekEndDate = weekEnd.toISOString();
+
+        // Ensure date is included
+        attendance.date = attendance.date || new Date().toISOString();
+
+        student.attendances.push(attendance);
 
         dataService.saveStudents(students);
+        return res.json(attendance);
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // GET student attendance history
 router.get('/:studentId/attendance', (req, res) => {
@@ -592,10 +688,11 @@ router.get('/check-levels/:studentId/:chapter', (req, res) => {
     }
 });
 
-// POST add problem (using DTO)
+
 router.post('/add-problem', (req, res) => {
     try {
         const dto = req.body;
+
         const students = dataService.loadStudents();
         const student = students.find(s => s.studentId === dto.studentId);
 
@@ -661,6 +758,7 @@ router.get('/attendance', (req, res) => {
 });
 
 // GET attendance streak
+
 router.get('/:studentId/streak', (req, res) => {
     try {
         const studentId = parseInt(req.params.studentId);
@@ -671,22 +769,48 @@ router.get('/:studentId/streak', (req, res) => {
             return res.status(404).json({ message: 'الطالب غير موجود' });
         }
 
-        // Get last 4 weeks of attendance (most recent first)
-        let streak = (student.attendances || [])
-            .sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate))
-            .slice(0, 4)
-            .map(a => a.isPresent ? 'حضور' : 'غياب');
+        // Group attendances by week to calculate streak based on weeks
+        const attendanceByWeek = {};
 
-        // Fill with "لا يوجد بيانات" if less than 4 records
+        (student.attendances || []).forEach(a => {
+            const weekKey = a.weekStartDate; // Use weekStartDate as key
+            if (!attendanceByWeek[weekKey]) {
+                attendanceByWeek[weekKey] = {
+                    date: new Date(a.weekStartDate),
+                    isPresent: false,
+                    weekStartDate: a.weekStartDate
+                };
+            }
+            // If present in ANY record for this week, mark week as present
+            if (a.isPresent) {
+                attendanceByWeek[weekKey].isPresent = true;
+            }
+        });
+
+        // Convert to array and sort by date descending
+        let streak = Object.values(attendanceByWeek)
+            .sort((a, b) => b.date - a.date)
+            .slice(0, 4)
+            .map(week => ({
+                status: week.isPresent ? 'حضور' : 'غياب',
+                date: week.date.toLocaleDateString('ar-EG')
+            }));
+
+        // Fill missing data
         while (streak.length < 4) {
-            streak.push('لا يوجد بيانات');
+            streak.push({
+                status: 'لا يوجد بيانات',
+                date: '---'
+            });
         }
 
         res.json({ attendanceStreak: streak });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // GET student's problems with status (remaining/solved)
 router.get('/:id/problems', (req, res) => {
@@ -694,7 +818,7 @@ router.get('/:id/problems', (req, res) => {
         const studentId = parseInt(req.params.id);
         const students = dataService.loadStudents();
         const problems = dataService.loadProblems();
-        
+
         const student = students.find(s => s.studentId === studentId);
         if (!student) {
             return res.status(404).json({ error: 'Student not found' });
@@ -718,6 +842,9 @@ router.get('/:id/problems', (req, res) => {
             const isRemaining = student.remainingProblems && student.remainingProblems.includes(problemId);
             const levelKey = `${problem.chapter}-${problem.level}`;
             const isLevelCompleted = student.completedLevels && student.completedLevels.includes(levelKey);
+
+            // Debug logging
+            console.log(`[DEBUG] Problem ${problemId}: isSolved=${isSolved}, type=${typeof problemId}, solvedArray contains:`, student.solvedProblems);
 
             // A problem can be solved OR remaining, but not both
             // If solved, it's no longer remaining
@@ -749,10 +876,10 @@ router.put('/:id/solve/:problemId', (req, res) => {
     try {
         const studentId = parseInt(req.params.id);
         const problemId = parseInt(req.params.problemId);
-        
+
         const students = dataService.loadStudents();
         const problems = dataService.loadProblems();
-        
+
         const student = students.find(s => s.studentId === studentId);
         if (!student) {
             return res.status(404).json({ error: 'Student not found' });
@@ -790,24 +917,17 @@ router.put('/:id/solve/:problemId', (req, res) => {
         if (!student.solvedProblems.includes(problemId)) {
             student.solvedProblems.push(problemId);
         }
-        
+
         console.log(`[DEBUG] Problem ${problemId} solved for student ${studentId}. Remaining: ${student.remainingProblems.length}, Solved: ${student.solvedProblems.length}`);
 
-        // Check if all problems in this level are solved
-        const levelKey = `${problem.chapter}-${problem.level}`;
-        const problemsInLevel = problems.filter(p => 
-            p.chapter === problem.chapter && p.level === problem.level
-        );
-        
-        const solvedProblemsInLevel = problemsInLevel.filter(p => 
-            student.solvedProblems.includes(p.id || p.problemId)
-        );
+        // Update progress automatically after solving a problem
+        // This will check if level is completed and move to next level if needed
+        levelProgressService.updateProgress(student);
 
-        // If all problems in level are solved, add level to completedLevels
-        if (problemsInLevel.length > 0 && solvedProblemsInLevel.length === problemsInLevel.length) {
-            if (!student.completedLevels.includes(levelKey)) {
-                student.completedLevels.push(levelKey);
-            }
+        // Find the student index to update in the array
+        const studentIndex = students.findIndex(s => s.studentId === studentId);
+        if (studentIndex !== -1) {
+            students[studentIndex] = student;
         }
 
         dataService.saveStudents(students);
@@ -820,7 +940,8 @@ router.put('/:id/solve/:problemId', (req, res) => {
                 remainingProblems: student.remainingProblems.length,
                 solvedProblems: student.solvedProblems.length,
                 completedLevels: student.completedLevels,
-                levelCompleted: solvedProblemsInLevel.length === problemsInLevel.length
+                currentChapter: student.currentChapter,
+                currentLevel: student.currentLevel
             }
         });
     } catch (error) {
@@ -833,10 +954,10 @@ router.delete('/:id/problem/:problemId', (req, res) => {
     try {
         const studentId = parseInt(req.params.id);
         const problemId = parseInt(req.params.problemId);
-        
+
         const students = dataService.loadStudents();
         const student = students.find(s => s.studentId === studentId);
-        
+
         if (!student) {
             return res.status(404).json({ error: 'Student not found' });
         }
@@ -859,7 +980,7 @@ router.delete('/:id/problem/:problemId', (req, res) => {
         const solvedIndex = student.solvedProblems.indexOf(problemId);
         if (solvedIndex !== -1) {
             student.solvedProblems.splice(solvedIndex, 1);
-            
+
             // Check if we need to remove a completed level
             const problems = dataService.loadProblems();
             const problem = problems.find(p => (p.id || p.problemId) === problemId);
@@ -868,13 +989,13 @@ router.delete('/:id/problem/:problemId', (req, res) => {
                 const levelIndex = student.completedLevels.indexOf(levelKey);
                 if (levelIndex !== -1) {
                     // Re-check if all problems in level are solved
-                    const problemsInLevel = problems.filter(p => 
+                    const problemsInLevel = problems.filter(p =>
                         p.chapter === problem.chapter && p.level === problem.level
                     );
-                    const solvedProblemsInLevel = problemsInLevel.filter(p => 
+                    const solvedProblemsInLevel = problemsInLevel.filter(p =>
                         student.solvedProblems.includes(p.id || p.problemId)
                     );
-                    
+
                     // If not all solved, remove from completedLevels
                     if (solvedProblemsInLevel.length !== problemsInLevel.length) {
                         student.completedLevels.splice(levelIndex, 1);
@@ -892,6 +1013,94 @@ router.delete('/:id/problem/:problemId', (req, res) => {
                 name: student.name,
                 remainingProblems: student.remainingProblems.length,
                 solvedProblems: student.solvedProblems.length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST finish level - Mark all problems in current chapter/level as solved
+router.post('/:id/finish-level', (req, res) => {
+    try {
+        const studentId = parseInt(req.params.id);
+        const { chapter, level } = req.body;
+
+        if (chapter === undefined || level === undefined) {
+            return res.status(400).json({ error: 'Chapter and level are required' });
+        }
+
+        const students = dataService.loadStudents();
+        const problems = dataService.loadProblems();
+
+        const student = students.find(s => s.studentId === studentId);
+        if (!student) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        // Initialize arrays if they don't exist
+        if (!student.remainingProblems) {
+            student.remainingProblems = [];
+        }
+        if (!student.solvedProblems) {
+            student.solvedProblems = [];
+        }
+        if (!student.completedLevels) {
+            student.completedLevels = [];
+        }
+
+        const chapterIndex = parseInt(chapter);
+        const levelIndex = parseInt(level);
+
+        // Get all problems for this chapter and level
+        const problemsInLevel = problems.filter(p =>
+            parseInt(p.chapter) === chapterIndex && parseInt(p.level) === levelIndex
+        );
+
+        if (problemsInLevel.length === 0) {
+            return res.status(404).json({ error: 'No problems found for this chapter and level' });
+        }
+
+        let solvedCount = 0;
+        // Mark all problems in this level as solved
+        problemsInLevel.forEach(problem => {
+            const problemId = problem.id || problem.problemId;
+
+            // Remove from remainingProblems if exists
+            const remainingIndex = student.remainingProblems.indexOf(problemId);
+            if (remainingIndex !== -1) {
+                student.remainingProblems.splice(remainingIndex, 1);
+            }
+
+            // Add to solvedProblems if not already there
+            if (!student.solvedProblems.includes(problemId)) {
+                student.solvedProblems.push(problemId);
+                solvedCount++;
+            }
+        });
+
+        // Update progress automatically (will move to next level if completed)
+        levelProgressService.updateProgress(student);
+
+        // Find the student index to update in the array
+        const studentIndex = students.findIndex(s => s.studentId === studentId);
+        if (studentIndex !== -1) {
+            students[studentIndex] = student;
+        }
+
+        dataService.saveStudents(students);
+
+        res.json({
+            message: `تم إنهاء المستوى بنجاح! تم حل ${solvedCount} مسألة`,
+            student: {
+                studentId: student.studentId,
+                name: student.name,
+                remainingProblems: student.remainingProblems.length,
+                solvedProblems: student.solvedProblems.length,
+                completedLevels: student.completedLevels,
+                currentChapter: student.currentChapter,
+                currentLevel: student.currentLevel,
+                chapterLevels: student.chapterLevels || {}
             }
         });
     } catch (error) {

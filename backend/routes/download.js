@@ -50,6 +50,67 @@ router.get('/empty-problems-excel/:chapter/:level', async (req, res) => {
     }
 });
 
+// GET students who completed a specific level
+router.get('/completed-level-excel/:chapter/:level', async (req, res) => {
+    try {
+        const chapter = parseInt(req.params.chapter);
+        const level = parseInt(req.params.level);
+        const students = dataService.loadStudents();
+
+        // Filter students who have completed this level
+        // completedLevels format: "chapter-level" e.g. "0-1"
+        const levelKey = `${chapter}-${level}`;
+
+        const completedStudents = students.filter(s =>
+            (s.completedLevels || []).includes(levelKey)
+        );
+
+        if (completedStudents.length === 0) {
+            return res.status(404).json({ error: 'No students found who completed this level.' });
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Completed_Level');
+
+        // Headers
+        worksheet.getRow(1).values = ['الكود', 'الاسم', 'الرقم', 'رقم ولي الأمر', 'المجموعة'];
+
+        // Style headers
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { bold: true };
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD3D3D3' }
+        };
+
+        // Data rows
+        completedStudents.forEach((student, index) => {
+            const row = worksheet.getRow(index + 2);
+            row.values = [
+                student.studentId,
+                student.name,
+                student.number,
+                student.parentNumber,
+                student.group
+            ];
+        });
+
+        // Auto-fit columns
+        worksheet.columns.forEach(column => {
+            column.width = 15;
+        });
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=Completed_Chapter${chapter}_Level${level}.xlsx`);
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // GET absent students Excel for current week
 router.get('/absent/current-week', async (req, res) => {
     try {

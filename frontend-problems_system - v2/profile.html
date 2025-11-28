@@ -1,99 +1,294 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="profile.css">
   <title>profile</title>
-
 </head>
 <body>
-  <h2 style="text-align: center;">بيانات الطالب</h2>
-  <div class="form-container">
-    <label for="studentName">الاسم:</label>
-    <input type="text" id="studentName" readonly />
 
-    <label for="studentCode">الكود:</label>
-    <input type="text" id="studentCode" readonly />
+<button id="backButton">رجوع</button>
 
-    <label for="studentNumber">رقم الطالب:</label>
-    <input type="text" id="studentNumber" readonly />
+<h2>بيانات الطالب</h2>
 
-    <label for="guardianNumber">رقم ولي الأمر:</label>
-    <input type="text" id="guardianNumber" readonly />
+<div class="form-container">
 
-    <label for="studentGroup">المجموعة:</label>
-    <input type="text" id="studentGroup" readonly />
-
-    <label for="currentLevel">المستوى الحالي:</label>
-    <input type="text" id="currentLevel" readonly />
-
-    <div class="attendance-box">
-      <p>عدد مرات الحضور في هذا الاسبوع: <span id="attendanceCount">0</span></p>
-    </div>
-  
-    <div class="absence-streak-box">
-      <p>سجل الحضور هذا الأسبوع: <span id="absenceStreak">جاري التحميل...</span></p>
-    </div>
-    <button onclick="location.href='chapter.html'" class="button">عرض مستويات الطالب</button>
-    <button onclick="location.href='questions.html'" class="button">عرض مسائل الباب الحالي</button>
+  <!-- Inputs -->
+  <div class="input-group">
+    <label>الاسم:</label>
+    <input type="text" id="studentName" readonly>
   </div>
+
+  <div class="input-group">
+    <label>الكود:</label>
+    <input type="text" id="studentCode" readonly>
+  </div>
+
+  <div class="input-group">
+    <label>رقم الطالب:</label>
+    <input type="text" id="studentNumber" readonly>
+  </div>
+
+  <div class="input-group">
+    <label>رقم ولي الأمر:</label>
+    <input type="text" id="guardianNumber" readonly>
+  </div>
+
+  <div class="input-group">
+    <label>المجموعة:</label>
+    <input type="text" id="studentGroup" readonly>
+  </div>
+
+  <!-- All Chapter Levels -->
+  <div class="chapter-levels-box">
+    <h3 style="text-align:center; color:#0b163f;">مستويات جميع الأبواب</h3>
+    <div id="allChapterLevels" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 10px;">
+      <div style="text-align:center;">جاري التحميل...</div>
+    </div>
+  </div>
+
+  <!-- Attendance -->
+  <div class="attendance-box">
+    <p>عدد مرات الحضور هذا الأسبوع: <span id="attendanceCount">0</span></p>
+  </div>
+
+  <!-- Streak (Modified to Table) -->
+  <div class="absence-streak-box">
+    <h3 style="text-align:center;">سجل الحضور هذا الأسبوع</h3>
+
+    <table class="streak-table">
+      <thead>
+        <tr>
+          <th>الحصه</th>
+          <th>الحضور</th>
+        </tr>
+      </thead>
+      <tbody id="absenceStreakTableBody">
+        <tr><td colspan="2" style="text-align:center;">جاري التحميل...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Payment -->
+  <div class="payment-box">
+    <h3 style="color:white;">معلومات الدفع</h3>
+    <div id="paymentInfo">جاري التحميل...</div>
+  </div>
+
+  <!-- Last Classes -->
+  <div class="last-classes-box">
+    <h3 style="text-align:center; color:#0b163f;">آخر الحصص</h3>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الحالة</th>
+            <th>التاريخ</th>
+            <th>اليوم</th>
+            <th>النوع</th>
+            <th>الدرجه</th>
+          </tr>
+        </thead>
+        <tbody id="lastClassesBody">
+          <tr><td colspan="6" style="text-align:center;">جاري التحميل...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <button onclick="location.href='chapter.html'">عرض مستويات الطالب</button>
+
+</div>
+
+<script>
+const baseUrl = 'http://localhost:5000';
+const grade3BaseUrl = 'http://localhost:7000';
+const studentId = localStorage.getItem('studentId') || new URLSearchParams(window.location.search).get("id");
+const thisweekchapter = localStorage.getItem('thisweekchapter');
+
+function getLevelName(levelName) {
+  const levels = ["Yellow", "Green", "Red", "Black", "Blue", "Gold", "Platinum", "Diamond"];
+  const levelIndex = levels.indexOf(levelName);
+  if (levelIndex !== -1) {
+    localStorage.setItem("theLevel", levelIndex);
+  }
+  return levelName;
+}
+
+/* ترجمة الأيام والأنواع */
+const translateDay = (day) => {
+  const days = {
+    Saturday: "السبت",
+    Sunday: "الأحد",
+    Monday: "الاثنين",
+    Tuesday: "الثلاثاء",
+    Wednesday: "الأربعاء",
+    Thursday: "الخميس",
+    Friday: "الجمعة",
+  };
+  return days[day] || day;
+};
+
+const translateType = (type) => {
+  if (type === "FirstOfWeek") return "أول الأسبوع";
+  if (type === "EndOfWeek") return "آخر الأسبوع";
+  if (type === "FridayClass") return "حصة الجمعة";
+  return type;
+};
+
+async function loadStudentData() {
+  try {
+    const [studentRes, attendanceRes, streakRes, currentMonthRes, lastClassesRes, paymentRes] =
+      await Promise.all([
+        fetch(`${baseUrl}/api/Students/search-id?id=${studentId}`),
+        fetch(`${baseUrl}/api/Students/current-week-count/${studentId}`),
+        fetch(`${baseUrl}/api/Students/${studentId}/streak`),
+        fetch(`${baseUrl}/api/Problem/currentmonth/${thisweekchapter}/${studentId}`),
+        fetch(`${grade3BaseUrl}/api/grade3/attendance/student/${studentId}/last-classes`).catch(()=>null),
+        fetch(`${grade3BaseUrl}/api/currentmonth/grade3/${studentId}`).catch(()=>null)
+      ]);
+
+    const studentData = await studentRes.json();
+    const attendanceCount = await attendanceRes.json();
+    const streakData = await streakRes.json();
+    const paymentData = paymentRes.ok ? await paymentRes.json() : null;
+    const lastClassesData = lastClassesRes?.ok ? await lastClassesRes.json() : [];
+
+    document.getElementById("studentName").value = studentData.name;
+    document.getElementById("studentCode").value = studentData.studentId;
+    document.getElementById("studentNumber").value = studentData.number;
+    document.getElementById("guardianNumber").value = studentData.parentNumber;
+    document.getElementById("studentGroup").value = studentData.group;
+    document.getElementById("attendanceCount").textContent = attendanceCount;
+
+    // Map chapter index to key
+    const chapterMap = ["Ch1", "Ch2", "Ch3", "Ch4", "ModernPhysics", "Ch8", "Kirchhoff"];
+    const chapterNames = ["الباب الأول", "الباب الثاني", "الباب الثالث", "الباب الرابع", "الحديثة", "الباب الثامن", "كيرشوف"];
+    const selectedChapterIndex = parseInt(thisweekchapter || "0");
+    const selectedChapterKey = chapterMap[selectedChapterIndex] || "Ch1";
     
-  <script>
-    const baseUrl = 'http://localhost:5000';
-    const studentId = localStorage.getItem('studentId') || new URLSearchParams(window.location.search).get("id");
-    const thisweekchapter = localStorage.getItem('thisweekchapter');
+    // Get level for the selected chapter, fallback to Yellow
+    const levelForChapter = (studentData.chapterLevels && studentData.chapterLevels[selectedChapterKey]) || "Yellow";
 
-    function getLevelName(level) {
-      const levels = ["Yellow", "Green", "Red", "Black", "Blue", "Gold", "Platinum", "Diamond"];
-      localStorage.setItem("theLevel", level); // Save the level index to localStorage
-      return levels[level] || "Unknown";
-    }
-    async function loadStudentData() {
-      try {
-        const [studentRes, attendanceRes, streakRes, levelRes] = await Promise.all([
-          fetch(`${baseUrl}/api/Students/search-id?id=${studentId}`),
-          fetch(`${baseUrl}/api/Students/current-week-count/${studentId}`),
-          fetch(`${baseUrl}/api/Students/${studentId}/streak`),
-          fetch(`${baseUrl}/api/UpdatingLevel/current-level/${studentId}/${thisweekchapter}`)
-        ]);
-
-        if (!studentRes.ok || !attendanceRes.ok || !streakRes.ok || !levelRes.ok) {
-          throw new Error('فشل تحميل بعض البيانات');
-        }
-
-        const studentData = await studentRes.json();
-        const attendanceCount = await attendanceRes.json();
-        const streakData = await streakRes.json();
-        const currentLevel = await levelRes.json();
-
-        // Format the attendance streak
-        const attendanceDays = streakData.attendanceStreak || [];
-        const streakDisplay = attendanceDays.length > 0 
-          ? attendanceDays.join(" → ") 
-          : "لا يوجد بيانات حضور";
-
-        // Update the DOM
-        document.getElementById("studentName").value = studentData.name || "غير متوفر";
-        document.getElementById("studentCode").value = studentData.studentId || "غير متوفر";
-        document.getElementById("studentNumber").value = studentData.number || "غير متوفر";
-        document.getElementById("guardianNumber").value = studentData.parentNumber || "غير متوفر";
-        document.getElementById("studentGroup").value = studentData.group || "غير متوفر";
-        document.getElementById("attendanceCount").textContent = attendanceCount;
-        document.getElementById("absenceStreak").textContent = streakDisplay;
-        document.getElementById("currentLevel").value = getLevelName(currentLevel);
+    // Display all chapter levels
+    const allChapterLevelsDiv = document.getElementById("allChapterLevels");
+    allChapterLevelsDiv.innerHTML = "";
+    
+    if (studentData.chapterLevels && Object.keys(studentData.chapterLevels).length > 0) {
+      chapterMap.forEach((chapterKey, index) => {
+        const level = studentData.chapterLevels[chapterKey] || "Yellow";
+        const chapterName = chapterNames[index];
         
-      } catch (error) {
-        console.error("Error:", error);
-        document.getElementById("attendanceCount").textContent = "0";
-        document.getElementById("absenceStreak").textContent = "غير متوفر";
-        document.getElementById("currentLevel").value = "غير معروف";
-        alert("حدث خطأ أثناء تحميل البيانات. الرجاء المحاولة لاحقاً.");
-      }
+        // Color coding based on level
+        const levelColors = {
+          "Yellow": "#FFD700",
+          "Green": "#28a745",
+          "Red": "#dc3545",
+          "Black": "#343a40",
+          "Blue": "#007bff",
+          "Gold": "#FFD700",
+          "Platinum": "#E5E4E2",
+          "Diamond": "#b9f2ff"
+        };
+        
+        const bgColor = levelColors[level] || "#6c757d";
+        const textColor = (level === "Yellow" || level === "Platinum" || level === "Diamond") ? "#000" : "#fff";
+        
+        const chapterCard = `
+          <div style="background: ${bgColor}; color: ${textColor}; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="font-weight: bold; margin-bottom: 5px;">${chapterName}</div>
+            <div style="font-size: 1.2em;">${level}</div>
+          </div>
+        `;
+        
+        allChapterLevelsDiv.innerHTML += chapterCard;
+      });
+    } else {
+      allChapterLevelsDiv.innerHTML = '<div style="text-align:center; grid-column: 1/-1;">لا توجد بيانات مستويات</div>';
     }
 
-    // Start loading data when page loads
-    window.addEventListener('DOMContentLoaded', loadStudentData);
-  </script>
+    /* Attendance streak — TABLE VERSION */
+    const attendanceDays = streakData.attendanceStreak || [];
+    const streakBody = document.getElementById("absenceStreakTableBody");
+    streakBody.innerHTML = "";
+
+    if (attendanceDays.length === 0) {
+      streakBody.innerHTML = `<tr><td colspan="2">لا يوجد بيانات</td></tr>`;
+    } else {
+     attendanceDays.forEach((item, index) => {
+    const status = item.status.includes("حضور") ? "present" : "absent";
+
+    const row = `
+      <tr>
+        <td>${item.date}</td>  <!-- عرض التاريخ بدل اليوم 1/2 -->
+        <td class="${status}">${item.status}</td>
+      </tr>
+    `;
+    streakBody.innerHTML += row;
+});
+
+    }
+
+    /* Payment UI */
+    if (paymentData) {
+      document.getElementById("paymentInfo").innerHTML = `
+        <div class="payment-line">الشهر الحالي: ${paymentData.currentMonth}</div>
+        <div class="payment-line">
+          حالة الدفع: 
+          <span class="${paymentData.isCurrentPaid ? 'status-paid' : 'status-unpaid'}">
+            ${paymentData.isCurrentPaid ? " مدفوع" : " غير مدفوع"}
+          </span>
+        </div>
+
+        <div class="payment-line">الشهر السابق: ${paymentData.previousMonth}</div>
+        <div class="payment-line">
+          حالة الدفع: 
+          <span class="${paymentData.isPreviousPaid ? 'status-paid' : 'status-unpaid'}">
+            ${paymentData.isPreviousPaid ? " مدفوع" : " غير مدفوع"}
+          </span>
+        </div>
+      `;
+    }
+
+    /* Last Classes with translated day and type */
+    const tbody = document.getElementById("lastClassesBody");
+    tbody.innerHTML = "";
+
+    if (lastClassesData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">لا يوجد بيانات</td></tr>`;
+    } else {
+      lastClassesData.forEach(item => {
+        const color = item.status === "حضور" ? "green" : "red";
+        const row = `
+          <tr>
+            <td>${item.no}</td>
+            <td style="color:${color}; font-weight:bold">${item.status}</td>
+            <td>${item.date}</td>
+            <td>${translateDay(item.day)}</td>
+            <td>${translateType(item.type)}</td>
+            <td>${item.mark}${item.isAutoDetected ? " (تلقائي)" : ""}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+
+  } catch (err) {
+    alert("خطأ في تحميل البيانات");
+  }
+}
+
+window.addEventListener("DOMContentLoaded", loadStudentData);
+document.getElementById('backButton').addEventListener('click', () => {
+    // غير الرابط ده للصفحة اللي عايز ترجع لها
+    window.location.href = 'index.html';
+});
+
+</script>
+
+
 </body>
 </html>

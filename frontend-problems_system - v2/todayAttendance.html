@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حضور اليوم</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* تصميم مشابه للـ profile */
+  @import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+
+  * { font-family: "Lalezar", system-ui; font-weight: 600; margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background: url(img/2.png) no-repeat center center fixed;
+    background-size: cover;
+    color: rgb(0,0,0);
+    direction: rtl;
+    margin-top: 20px;
+  }
+
+  h2 {
+    padding-top: 2.5%;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 28px;
+  }
+
+ .form-container {
+  background: rgba(255, 255, 255, 0.85);
+
+  box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+  .attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .attendance-table th, .attendance-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .attendance-table th {
+    background-color: #0b163f;
+    color: white;
+  }
+
+  input.note-input {
+    width: 90%;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  button.save-btn {
+    background-color: #0b163f;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  button.save-btn:hover {
+    background-color: #1a2a5b;
+  }
+
+  #backButton {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #0b163f;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    transition: background-color 0.2s;
+  }
+
+  #backButton:hover { background-color: #1a2a5b; }
+
+</style>
+</head>
+<body>
+
+<button id="backButton" onclick="window.location.href='index.html'">رجوع</button>
+
+<h2>حضور اليوم</h2>
+
+<div class="form-container">
+  <label for="attendanceDate">اختر التاريخ:</label>
+  <input type="date" id="attendanceDate">
+
+  <table class="attendance-table" id="attendanceTable">
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>الكود</th>
+        <th>حضور</th>
+        <th>المسايْل</th>
+        <th>حفظ</th>
+      </tr>
+    </thead>
+    <tbody id="attendanceBody">
+      <tr><td colspan="5">جاري التحميل...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:5000/api';
+const attendanceDateInput = document.getElementById('attendanceDate');
+
+// تعيين التاريخ الحالي
+attendanceDateInput.value = new Date().toISOString().split('T')[0];
+
+// تحميل الحضور لليوم
+async function loadAttendance(date) {
+  const res = await fetch(`${API_BASE}/attendance/date/${date}`);
+  const data = await res.json();
+  const tbody = document.getElementById('attendanceBody');
+  tbody.innerHTML = '';
+
+  // فصل الحاضرين عن الغائبين
+  const presentStudents = data.filter(s => s.isPresent);
+  const absentStudents = data.filter(s => !s.isPresent);
+
+  // دالة لإضافة الصفوف
+  const addRows = (students) => {
+    students.forEach(student => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${student.name}</td>
+        <td>${student.studentId}</td>
+        <td>${student.isPresent ? '✅' : '❌'}</td>
+        <td><input type="text" class="note-input" id="note-${student.studentId}" value="${student.notes}"></td>
+        <td><button class="save-btn" onclick="saveNote(${student.studentId}, '${date}')">حفظ</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+  };
+
+  // عرض الحاضرين أولًا ثم الغائبين
+  addRows(presentStudents);
+  addRows(absentStudents);
+}
+
+
+
+async function saveNote(studentId, date) {
+  const note = document.getElementById(`note-${studentId}`).value;
+  try {
+    const res = await fetch(`${API_BASE}/attendance/${studentId}/${encodeURIComponent(date)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note })
+    });
+    if (res.ok) alert('✅ تم حفظ المسايْل');
+    else throw new Error();
+  } catch(err) {
+    alert('❌ حدث خطأ أثناء الحفظ');
+    console.error(err);
+  }
+}
+
+// تغيير التاريخ يعيد تحميل الحضور
+attendanceDateInput.addEventListener('change', e => loadAttendance(e.target.value));
+
+// تحميل تلقائي عند فتح الصفحة
+loadAttendance(attendanceDateInput.value);
+</script>
+
+</body>
+</html>

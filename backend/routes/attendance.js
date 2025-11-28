@@ -1,4 +1,5 @@
 const express = require('express');
+const Attendance = require('../models/Attendance');
 const router = express.Router();
 const dataService = require('../services/DataService');
 const { getCurrentWeekDatesForAttendance } = require('../utils/weekHelper');
@@ -147,6 +148,63 @@ router.get('/:studentId', (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+// GET /attendance/date/:date
+router.get('/date/:date', (req, res) => {
+  const date = req.params.date; // يجب أن يكون في شكل YYYY-MM-DD
+  const students = dataService.loadStudents();
+
+  
+  const attendanceToday = students.map(student => {
+    const attendance = (student.attendances || []).find(a => a.date === date);
+    if (attendance) {
+      return {
+        studentId: student.studentId,
+        name: student.name,
+        notes: attendance.notes,
+        isPresent: attendance.isPresent
+      };
+    } else {
+      return {
+        studentId: student.studentId,
+        name: student.name,
+        notes: "",
+        isPresent: false
+      };
+    }
+  });
+
+  res.json(attendanceToday);
+});
+// PUT /attendance/:studentId/:date
+router.put('/:studentId/:date', (req, res) => {
+  const studentId = parseInt(req.params.studentId);
+  const date = req.params.date;
+  const { note } = req.body;
+
+  const students = dataService.loadStudents();
+  const student = students.find(s => s.studentId === studentId);
+  if (!student) return res.status(404).json({ error: 'Student not found' });
+
+  let attendance = (student.attendances || []).find(a => a.date === date);
+
+  if (!attendance) {
+    // لو مفيش حضور لليوم، نضيف واحد جديد
+    attendance = new Attendance({
+      studentId,
+      date,
+      isPresent: true,
+      notes: note
+    });
+    student.attendances.push(attendance);
+  } else {
+    // بس نعدل الملاحظة
+    attendance.notes = note;
+  }
+
+  dataService.saveStudents(students);
+  res.json(attendance);
+});
+
 
 module.exports = router;
 
