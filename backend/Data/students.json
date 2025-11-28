@@ -552,6 +552,15 @@
         "weekEndDate": "2025-11-27T22:00:00.000Z",
         "isPresent": false,
         "notes": "Absent automatically (no attendance recorded)"
+      },
+      {
+        "attendanceId": null,
+        "studentId": 10,
+        "weekStartDate": null,
+        "weekEndDate": null,
+        "isPresent": true,
+        "notes": "",
+        "date": "2025-11-28"
       }
     ]
   },
@@ -584,7 +593,17 @@
     "solvedProblems": [],
     "completedLevels": [],
     "assignedProblems": [],
-    "attendances": []
+    "attendances": [
+      {
+        "attendanceId": null,
+        "studentId": 52212,
+        "weekStartDate": null,
+        "weekEndDate": null,
+        "isPresent": true,
+        "notes": "ة",
+        "date": "2025-11-28"
+      }
+    ]
   },
   {
     "studentId": 500000000,
